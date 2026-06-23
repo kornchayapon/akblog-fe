@@ -1,5 +1,7 @@
+'use client';
+
 import Footer from '@/modules/front/common/components/footer';
-import FrontNavbar from '@/modules/front/common/components/navbar/navbar';
+import FrontNavbar from '@/modules/front/common/components/navbar/front-navbar';
 
 interface LayoutProps {
   children: React.ReactNode;

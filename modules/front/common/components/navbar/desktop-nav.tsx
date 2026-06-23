@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 
 import { cn, isNavItemActive } from '@/lib/utils';
 
-import { NavItem } from './navbar';
+import { NavItem } from './front-navbar';
 import Link from 'next/link';
 
 interface DesktopNavProps {
