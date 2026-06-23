@@ -3,6 +3,8 @@ import SearchNav from './search-nav';
 import DesktopNav from './desktop-nav';
 import UserNav from './user-nav';
 import { Button } from '@/components/ui/button';
+import SignUpDialog from '@/modules/front/auth/components/sign-up-dialog';
+import { useAuthDialog } from '@/modules/front/auth/stores/auth-dialog';
 
 const user = null;
 
@@ -23,6 +25,7 @@ const navItems: NavItem[] = [
 ];
 
 const FrontNavbar = () => {
+  const { isSignUpOpen, setSignUpOpen } = useAuthDialog();
   return (
     <div
       className='fixed top-0 left-0 right-0 z-50 
@@ -61,7 +64,10 @@ const FrontNavbar = () => {
               </Button>
               <Button
                 className='rounded-xl bg-primary px-6 font-bold text-primary-foreground 
-                shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.98]'
+                  shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 
+                  active:scale-[0.98]'
+
+                onClick={() => setSignUpOpen(true)}
               >
                 Sign up
               </Button>
@@ -69,6 +75,9 @@ const FrontNavbar = () => {
           )}
         </div>
       </div>
+
+      {/* Auth dialog */}
+      <SignUpDialog open={isSignUpOpen} onOpenChange={setSignUpOpen} />
     </div>
   );
 };
