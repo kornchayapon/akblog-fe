@@ -1,7 +1,11 @@
 'use client';
-
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/react-query/query-client';
 import { IBM_Plex_Sans_Thai, Manrope, Newsreader } from 'next/font/google';
+
 import './globals.css';
+
+import { Toaster } from 'sonner';
 
 const ibm = IBM_Plex_Sans_Thai({
   subsets: ['latin'],
@@ -29,11 +33,14 @@ interface LayoutProps {
 const RootLayout = ({ children }: Readonly<LayoutProps>) => {
   return (
     <html lang='en'>
-      <body
-        className={`${manrope.variable} ${newsreader.variable} ${ibm.variable} ${manrope.className} font-sans antialiased`}
-      >
-        {children}
-      </body>
+      <QueryClientProvider client={queryClient}>
+        <body
+          className={`${manrope.variable} ${newsreader.variable} ${ibm.variable} ${manrope.className} font-sans antialiased`}
+        >
+          {children}
+          <Toaster />
+        </body>
+      </QueryClientProvider>
     </html>
   );
 };

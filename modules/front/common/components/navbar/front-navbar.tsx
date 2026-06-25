@@ -4,7 +4,7 @@ import DesktopNav from './desktop-nav';
 import UserNav from './user-nav';
 import { Button } from '@/components/ui/button';
 import SignUpDialog from '@/modules/front/auth/components/sign-up-dialog';
-import { useAuthDialog } from '@/modules/front/auth/stores/auth-dialog';
+import { useAuthDialogStore } from '@/modules/front/auth/stores/auth-dialog-store';
 
 const user = null;
 
@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
 ];
 
 const FrontNavbar = () => {
-  const { isSignUpOpen, setSignUpOpen } = useAuthDialog();
+  const { isSignUpOpen, setSignUpOpen } = useAuthDialogStore();
   return (
     <div
       className='fixed top-0 left-0 right-0 z-50 
