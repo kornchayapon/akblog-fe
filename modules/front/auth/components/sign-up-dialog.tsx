@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 
-import { useAuthDialog } from '../stores/auth-dialog';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { useAuthDialogStore } from '../stores/auth-dialog-store';
+import { useAuth } from '../hooks/use-auth';
+
+import { Eye, EyeOff, Loader2, UserPlus } from 'lucide-react';
 
 import {
   Dialog,
@@ -17,6 +21,16 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
+import {
+  SignUpExtendSchema,
+  SignUpFormValues,
+} from '../../schemas/auth-schemas';
+
+import { checkAxiosError } from '@/lib/functions/check-axios-error';
+
+import FormFieldError from '../../common/components/form-field-error';
+import FormErrorMessage from '../../common/components/form-error-message';
+
 interface SignupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,8 +39,43 @@ interface SignupDialogProps {
 const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { setSignUpOpen } = useAuthDialog();
+  const { setSignUpOpen } = useAuthDialogStore();
+  const { actions, status } = useAuth();
+
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { errors },
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(SignUpExtendSchema),
+  });
+
+  const clearError = () => setErrorMessage(null);
+
+  const onSubmit = async (data: SignUpFormValues) => {
+    console.log('submit form', data);
+
+    try {
+      await actions.signUp({
+        firstName: data.firstName,
+        email: data.email,
+        password: data.password,
+      });
+
+      reset(); // clear form
+      setErrorMessage(null);
+      setSignUpOpen(false);
+    } catch (error: unknown) {
+      if (checkAxiosError(error)) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage('Sign up failed. Please try again.');
+      }
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,7 +100,13 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
         </DialogHeader>
 
         <div className='space-y-5 pt-1'>
-          <form className='space-y-4' noValidate>
+          <FormErrorMessage message={errorMessage} />
+
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className='space-y-4'
+            noValidate
+          >
             <div className='space-y-1.5'>
               <Label htmlFor='signup-firstName'>Full Name</Label>
               <Input
@@ -59,6 +114,8 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
                 type='text'
                 placeholder='Your name'
                 autoComplete='name'
+                disabled={status.isSignUpPending}
+                {...register('firstName', { onChange: clearError })}
               />
             </div>
 
@@ -69,6 +126,8 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
                 type='email'
                 placeholder='you@example.com'
                 autoComplete='email'
+                disabled={status.isSignUpPending}
+                {...register('email', { onChange: clearError })}
               />
             </div>
 
@@ -81,6 +140,8 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
                   placeholder='••••••••'
                   autoComplete='new-password'
                   className='pr-10'
+                  disabled={status.isSignUpPending}
+                  {...register('password', { onChange: clearError })}
                 />
                 <button
                   type='button'
@@ -96,6 +157,7 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
                   )}
                 </button>
               </div>
+              <FormFieldError message={errors.password?.message} />
             </div>
 
             <div className='space-y-1.5'>
@@ -107,6 +169,8 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
                   placeholder='••••••••'
                   autoComplete='new-password'
                   className='pr-10'
+                  disabled={status.isSignUpPending}
+                  {...register('confirmPassword', { onChange: clearError })}
                 />
                 <button
                   type='button'
@@ -126,12 +190,43 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
                   )}
                 </button>
               </div>
+              <FormFieldError message={errors.confirmPassword?.message} />
             </div>
 
-            <Button type='submit' className='w-full'>
+            <Button
+              type='submit'
+              className='w-full'
+              disabled={status.isSignUpPending}
+            >
+              {status.isSignUpPending ? (
+                <Loader2 className='mr-2 size-4 animate-spin' />
+              ) : null}
               Create Account
             </Button>
           </form>
+
+          {/* Separator */}
+          <div className='relative'>
+            <div className='absolute inset-0 flex items-center'>
+              <span className='w-full border-t border-border' />
+            </div>
+            <div className='relative flex justify-center text-xs uppercase'>
+              <span className='bg-card px-4 font-bold tracking-widest text-muted-foreground'>
+                or continue with
+              </span>
+            </div>
+          </div>
+
+          <div className='text-center text-sm text-muted-foreground'>
+            Already have an account?{' '}
+            <button
+              type='button'
+              className='font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/85 hover:underline disabled:pointer-events-none disabled:opacity-50'
+              disabled={status.isSignUpPending}
+            >
+              Sign in
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

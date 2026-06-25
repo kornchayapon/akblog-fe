@@ -6,7 +6,7 @@ interface AuthDialogStore {
   setSignUpOpen: (open: boolean) => void;
 }
 
-export const useAuthDialog = create<AuthDialogStore>()(
+export const useAuthDialogStore = create<AuthDialogStore>()(
   devtools((set) => ({
     isSignUpOpen: false,
 

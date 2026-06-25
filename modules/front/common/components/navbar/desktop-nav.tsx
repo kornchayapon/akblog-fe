@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 
-import { cn, isNavItemActive } from '@/lib/utils';
+import { cn, isNavItemActive } from '@/lib/utils/utils';
 
 import { NavItem } from './front-navbar';
 import Link from 'next/link';
