@@ -41,7 +41,7 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { setSignUpOpen } = useAuthDialogStore();
+  const { setSignUpOpen, setSignInOpen } = useAuthDialogStore();
   const { actions, status } = useAuth();
 
   const {
@@ -76,6 +76,12 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
       }
     }
   };
+
+  const handleSwitchToSignIn = () => {
+    setSignUpOpen(false);
+    setSignInOpen(true);
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -217,12 +223,14 @@ const SignUpDialog = ({ open, onOpenChange }: SignupDialogProps) => {
             </div>
           </div>
 
+          {/* Switch to Sign In */}
           <div className='text-center text-sm text-muted-foreground'>
             Already have an account?{' '}
             <button
               type='button'
               className='font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/85 hover:underline disabled:pointer-events-none disabled:opacity-50'
               disabled={status.isSignUpPending}
+              onClick={handleSwitchToSignIn}
             >
               Sign in
             </button>

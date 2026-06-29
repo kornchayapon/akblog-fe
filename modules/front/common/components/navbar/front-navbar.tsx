@@ -5,6 +5,7 @@ import UserNav from './user-nav';
 import { Button } from '@/components/ui/button';
 import SignUpDialog from '@/modules/front/auth/components/sign-up-dialog';
 import { useAuthDialogStore } from '@/modules/front/auth/stores/auth-dialog-store';
+import SignInDialog from '@/modules/front/auth/components/sign-in-dialog';
 
 const user = null;
 
@@ -25,7 +26,9 @@ const navItems: NavItem[] = [
 ];
 
 const FrontNavbar = () => {
-  const { isSignUpOpen, setSignUpOpen } = useAuthDialogStore();
+  const { isSignUpOpen, setSignUpOpen, isSignInOpen, setSignInOpen } =
+    useAuthDialogStore();
+
   return (
     <div
       className='fixed top-0 left-0 right-0 z-50 
@@ -59,6 +62,7 @@ const FrontNavbar = () => {
                 variant='ghost'
                 className='hidden sm:flex rounded-xl font-bold text-foreground 
                   transition-colors hover:bg-muted hover:text-primary'
+                onClick={() => setSignInOpen(true)}
               >
                 Sign in
               </Button>
@@ -66,7 +70,6 @@ const FrontNavbar = () => {
                 className='rounded-xl bg-primary px-6 font-bold text-primary-foreground 
                   shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 
                   active:scale-[0.98]'
-
                 onClick={() => setSignUpOpen(true)}
               >
                 Sign up
@@ -78,6 +81,7 @@ const FrontNavbar = () => {
 
       {/* Auth dialog */}
       <SignUpDialog open={isSignUpOpen} onOpenChange={setSignUpOpen} />
+      <SignInDialog open={isSignInOpen} onOpenChange={setSignInOpen} />
     </div>
   );
 };
