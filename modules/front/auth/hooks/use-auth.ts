@@ -16,6 +16,11 @@ type SignUpPayload = {
   password: string;
 };
 
+type SignInPayload = {
+  email: string;
+  password: string;
+};
+
 interface AuthResponse {
   access_token: string;
   user: User;
@@ -62,12 +67,33 @@ export const useAuth = () => {
     },
   });
 
+  const signInMutation = useMutation({
+    mutationFn: (payload: SignInPayload) =>
+      apiClient.post('/auth/signin', payload).then((res) => res.data),
+    onSuccess: (data) => {
+      handleAuthSuccess(data, 'Welcome back!');
+    },
+    onError: (error: unknown) => {
+      if (checkAxiosError(error)) {
+        const errorData = error.response.data;
+        console.log('[signUpMutation]: ', errorData);
+        toast.error(errorData.message);
+        return;
+      }
+
+      console.error('[signInMutation_FATAL_ERROR]:', error);
+      toast.error('Sign In failed. Please try again.');
+    },
+  });
+
   return {
     actions: {
       signUp: signUpMutation.mutateAsync,
+      signIn: signInMutation.mutateAsync,
     },
     status: {
       isSignUpPending: signUpMutation.isPending,
+      isSignInPending: signInMutation.isPending,
     }
   }
 };

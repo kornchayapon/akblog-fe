@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+// sign in
+export const SignInSchema = z.object({
+  email: z.email('Email invalid'),
+  password: z.string().min(1, 'Please, enter your password'),
+});
+
+export type SignInFormValues = z.infer<typeof SignInSchema>;
+
+// sign up
 export const SignUpSchema = z.object({
   firstName: z.string().min(1, 'Please, enter your first name'),
   email: z.email('Email invalid'),
