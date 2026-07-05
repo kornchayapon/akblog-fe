@@ -43,7 +43,7 @@ const FrontNavbar = ({ user }: NavbarProps) => {
     >
       <div
         className='container mx-auto h-16 px-4 flex items-center 
-      justify-between gap-4  border border-red-500'
+      justify-between gap-4'
       >
         {/* Left: Logo & Sidebar Trigger */}
         <div className='flex items-center gap-4 shrink-0'>
@@ -59,8 +59,8 @@ const FrontNavbar = ({ user }: NavbarProps) => {
         {/* Right: User Actions */}
         <div>
           {user ? (
-            <div>
-              <UserNav />
+            <div className='flex items-center gap-1 sm:gap-2'>
+              <UserNav user={user}/>
             </div>
           ) : (
             <div className='flex items-center gap-2'>
@@ -70,7 +70,7 @@ const FrontNavbar = ({ user }: NavbarProps) => {
                   transition-colors hover:bg-muted hover:text-primary'
                 onClick={() => setSignInOpen(true)}
               >
-                Sign in
+                Sign In
               </Button>
               <Button
                 className='rounded-xl bg-primary px-6 font-bold text-primary-foreground 
@@ -78,7 +78,7 @@ const FrontNavbar = ({ user }: NavbarProps) => {
                   active:scale-[0.98]'
                 onClick={() => setSignUpOpen(true)}
               >
-                Sign up
+                Sign Up
               </Button>
             </div>
           )}
