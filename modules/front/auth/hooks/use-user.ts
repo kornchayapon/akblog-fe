@@ -17,6 +17,8 @@ import { toast } from 'sonner';
 
 export const useUser = () => {
   const clearAuth = authStore((state) => state.clearAuth);
+  const storeUser = authStore((state) => state.user);
+  const setUser = authStore((state) => state.setUser);
 
   const { data, isLoading, isFetching, isError, error, refetch } =
     useQuery<User | null>({
@@ -54,17 +56,16 @@ export const useUser = () => {
   const invalidateUser = () => {
     queryClient.invalidateQueries({ queryKey: [USER_PROFILE_KEY] });
   };
-
-  const setUser = authStore((state) => state.setUser);
+  
 
   const user = useMemo(() => {
-    if (!data) return null;
-    return data;
-  }, [data]);
+    return data ?? storeUser ?? null;
+  }, [data, storeUser]);
 
   useEffect(() => {
-    if (!data) return;
-    setUser(data);
+    if (data) {
+      setUser(data);
+    }
   }, [data, setUser]);
 
   return {

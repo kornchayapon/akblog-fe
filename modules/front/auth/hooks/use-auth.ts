@@ -9,6 +9,7 @@ import apiClient from '@/lib/axios/axios';
 import { User } from '@/lib/interfaces/user';
 import { USER_PROFILE_KEY } from '@/lib/constants/query-key';
 import { checkAxiosError } from '@/lib/functions/check-axios-error';
+import { useRouter } from 'next/navigation';
 
 type SignUpPayload = {
   firstName: string;
@@ -27,7 +28,8 @@ interface AuthResponse {
 }
 
 export const useAuth = () => {
-  const { setAccessToken, clearAuth } = useAuthStore();  
+  const { setAccessToken, clearAuth } = useAuthStore();
+  const router = useRouter();
 
   const handleAuthSuccess = (
     data: { access_token: string },
@@ -86,20 +88,39 @@ export const useAuth = () => {
     },
   });
 
-  const signOut = () => {
-    clearAuth();
-    queryClient.clear();
-  }
+  const signOutMutation = useMutation({
+    mutationFn: () => apiClient.post('/auth/signout'),
+    onSuccess: () => {
+      // Clear all auth state
+      clearAuth();
+      // Reset all queries to initial state
+      queryClient.clear();
+      toast.success('Sign Out successful');
+      router.push('/');
+    },
+    onError: (error: unknown) => {
+      // Even if the server request fails, we should clear local session
+      console.error(
+        'Signout failed on server, clearing local session anyway.',
+        error,
+      );
+      clearAuth();
+      queryClient.clear();
+      toast.success('Sign Out error, Clear Auth!');
+      router.push('/');
+    },
+  });
 
   return {
     actions: {
       signUp: signUpMutation.mutateAsync,
       signIn: signInMutation.mutateAsync,
-      signOut
+      signOut: signOutMutation.mutateAsync,
     },
     status: {
       isSignUpPending: signUpMutation.isPending,
       isSignInPending: signInMutation.isPending,
+      isSignOutPending: signOutMutation.isPending,
     }
   }
 };
