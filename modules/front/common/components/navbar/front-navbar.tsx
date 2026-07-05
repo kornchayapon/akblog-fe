@@ -1,13 +1,19 @@
-import Logo from './logo';
-import SearchNav from './search-nav';
-import DesktopNav from './desktop-nav';
-import UserNav from './user-nav';
 import { Button } from '@/components/ui/button';
+
 import SignUpDialog from '@/modules/front/auth/components/sign-up-dialog';
 import { useAuthDialogStore } from '@/modules/front/auth/stores/auth-dialog-store';
 import SignInDialog from '@/modules/front/auth/components/sign-in-dialog';
 
-const user = null;
+import { User } from '@/lib/interfaces/user';
+
+import Logo from './logo';
+import SearchNav from './search-nav';
+import DesktopNav from './desktop-nav';
+import UserNav from './user-nav';
+
+interface NavbarProps {
+  user: User | null;
+}
 
 export interface NavItem {
   href: string;
@@ -25,7 +31,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-const FrontNavbar = () => {
+const FrontNavbar = ({ user }: NavbarProps) => {
   const { isSignUpOpen, setSignUpOpen, isSignInOpen, setSignInOpen } =
     useAuthDialogStore();
 
