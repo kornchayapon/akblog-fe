@@ -1,6 +1,10 @@
+import { useAuth } from "@/modules/front/auth/hooks/use-auth";
+
 const UserNav = () => {
+  const { actions } = useAuth();
+
   return (
-    <div>UserNav</div>
+    <div onClick={() => actions.signOut()}>Sign Out</div>
   )
 }
 

@@ -27,7 +27,7 @@ interface AuthResponse {
 }
 
 export const useAuth = () => {
-  const { setAccessToken } = useAuthStore();  
+  const { setAccessToken, clearAuth } = useAuthStore();  
 
   const handleAuthSuccess = (
     data: { access_token: string },
@@ -86,10 +86,16 @@ export const useAuth = () => {
     },
   });
 
+  const signOut = () => {
+    clearAuth();
+    queryClient.clear();
+  }
+
   return {
     actions: {
       signUp: signUpMutation.mutateAsync,
       signIn: signInMutation.mutateAsync,
+      signOut
     },
     status: {
       isSignUpPending: signUpMutation.isPending,
