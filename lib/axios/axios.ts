@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-import { authStore } from '@/modules/front/auth/stores/auth-store';
+import { authStore } from '@/modules/guest/auth/stores/auth-store';
 
 interface FailedRequest {
   resolve: (token: string | null) => void;

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { AxiosError } from 'axios';
 import { apiServer } from '@/lib/axios/axios';
 
-import { SignInSchema } from '@/modules/front/schemas/auth-schemas';
+import { SignInSchema } from '@/modules/guest/schemas/auth-schemas';
 
 export const POST = async (req: Request) => {
   try {

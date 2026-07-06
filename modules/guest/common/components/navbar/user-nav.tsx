@@ -23,7 +23,7 @@ import {
 
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { User } from '@/lib/interfaces/user';
-import { useAuth } from '@/modules/front/auth/hooks/use-auth';
+import { useAuth } from '@/modules/guest/auth/hooks/use-auth';
 
 interface UserNavProps {
   user: User | null;
