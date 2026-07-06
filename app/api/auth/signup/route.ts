@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { SignUpSchema } from "@/modules/front/schemas/auth-schemas";
+import { SignUpSchema } from "@/modules/guest/schemas/auth-schemas";
 
 import { apiServer } from '@/lib/axios/axios';
 import { checkAxiosError } from '@/lib/functions/check-axios-error';

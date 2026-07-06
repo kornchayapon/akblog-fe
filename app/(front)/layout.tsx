@@ -2,11 +2,11 @@
 
 import { Suspense } from 'react';
 
-import { useUser } from '@/modules/front/auth/hooks/use-user';
-import Footer from '@/modules/front/common/components/footer';
-import FrontNavbar from '@/modules/front/common/components/navbar/front-navbar';
-import NavbarSkeleton from '@/modules/front/common/components/navbar/navbar-skeleton';
-import Loading from '@/modules/front/common/components/loading';
+import { useUser } from '@/modules/guest/auth/hooks/use-user';
+import Footer from '@/modules/guest/common/components/footer';
+import FrontNavbar from '@/modules/guest/common/components/navbar/front-navbar';
+import NavbarSkeleton from '@/modules/guest/common/components/navbar/navbar-skeleton';
+import Loading from '@/modules/guest/common/components/loading';
 
 interface LayoutProps {
   children: React.ReactNode;

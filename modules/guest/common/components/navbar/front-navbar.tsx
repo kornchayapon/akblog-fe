@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 
-import SignUpDialog from '@/modules/front/auth/components/sign-up-dialog';
-import { useAuthDialogStore } from '@/modules/front/auth/stores/auth-dialog-store';
-import SignInDialog from '@/modules/front/auth/components/sign-in-dialog';
+import SignUpDialog from '@/modules/guest/auth/components/sign-up-dialog';
+import { useAuthDialogStore } from '@/modules/guest/auth/stores/auth-dialog-store';
+import SignInDialog from '@/modules/guest/auth/components/sign-in-dialog';
 
 import { User } from '@/lib/interfaces/user';
 

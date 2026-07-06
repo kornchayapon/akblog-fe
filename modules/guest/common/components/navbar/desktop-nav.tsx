@@ -1,11 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { cn, isNavItemActive } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 
 import { NavItem } from './front-navbar';
-import Link from 'next/link';
+import { isNavItemActive } from './nav-link-utils';
 
 interface DesktopNavProps {
   items: NavItem[];
