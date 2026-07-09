@@ -1,46 +1,54 @@
-import { Bell, LayoutDashboard, LayoutGrid, MessagesSquare, Newspaper, Tag, Users } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import {
+  IconArticle,
+  IconBell,
+  IconCategory,
+  IconDashboard,
+  IconMessage,
+  IconTag,
+  IconUsers,
+  type Icon,
+} from '@tabler/icons-react';
 
 export interface NavItem {
   title: string;
   url: string;
-  icon?: LucideIcon;
+  icon?: Icon;
 }
 
 export const navItems: NavItem[] = [
   {
     title: 'Dashboard',
     url: '/admin',
-    icon: LayoutDashboard,
+    icon: IconDashboard,
   },
   {
     title: 'Blogs',
     url: '/admin/blogs',
-    icon: Newspaper,
+    icon: IconArticle,
   },
   {
     title: 'Categories',
     url: '/admin/categories',
-    icon: LayoutGrid,
+    icon: IconCategory,
   },
   {
     title: 'Tags',
     url: '/admin/tags',
-    icon: Tag,
+    icon: IconTag,
   },
   {
     title: 'Comments',
     url: '/admin/comments',
-    icon: MessagesSquare,
+    icon: IconMessage,
   },
   {
     title: 'Users',
     url: '/admin/users',
-    icon: Users,
+    icon: IconUsers,
   },
   {
     title: 'Notifications',
     url: '/admin/notifications',
-    icon: Bell,
+    icon: IconBell,
   },
 ];

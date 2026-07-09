@@ -2,10 +2,10 @@
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
-import { AdminGuard } from '@/modules/admin/common/admin-guard';
+import { AdminGuard } from '@/modules/admin/common/components/admin-guard';
 
-import AppSidebar from '@/modules/admin/common/sidebar/app-sidebar';
-import AdminNavbar from '@/modules/admin/common/admin-navbar';
+import AppSidebar from '@/modules/admin/common/components/sidebar/app-sidebar';
+import AdminNavbar from '@/modules/admin/common/components/admin-navbar';
 
 import { useUser } from '@/modules/guest/auth/hooks/use-user';
 

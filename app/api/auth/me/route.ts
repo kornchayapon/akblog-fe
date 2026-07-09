@@ -6,8 +6,6 @@ import { NextResponse } from 'next/server';
 export const GET = async (req: Request) => {
   const authHeader = req.headers.get('authorization');
 
-  console.log('[api/auth/me]: authHeader', authHeader);
-
   if (!authHeader) {
     const res401 = NextResponse.json(
       { message: 'Authorization Header not found!' },
@@ -27,8 +25,6 @@ export const GET = async (req: Request) => {
     });
 
     const user = res.data; // data is user
-
-    console.log('[api/auth/me]: server get', user);
 
     // Error response
     if (res.status < 200 || res.status >= 300) {

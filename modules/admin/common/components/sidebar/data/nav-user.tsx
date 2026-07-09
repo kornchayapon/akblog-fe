@@ -23,7 +23,12 @@ import {
 import { User } from '@/lib/interfaces/user';
 // import { getUserAvatarSrc } from '@/lib/utils/user-avatar-src';
 import { useAuth } from '@/modules/guest/auth/hooks/use-auth';
-import { CircleUserRound, EllipsisVertical, LogOut } from 'lucide-react';
+
+import {
+  IconDotsVertical,
+  IconLogout,
+  IconUserCircle,
+} from '@tabler/icons-react';
 
 
 export function SidebarUserSkeleton() {
@@ -93,7 +98,7 @@ export const NavUser = ({ user }: NavUserProps) => {
                   {user.email}
                 </span>
               </div>
-              <EllipsisVertical className='ml-auto size-4' />
+              <IconDotsVertical className='ml-auto size-4' />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -124,7 +129,7 @@ export const NavUser = ({ user }: NavUserProps) => {
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link href='/profile/edit'>
-                  <CircleUserRound />
+                  <IconUserCircle />
                   Update profile
                 </Link>
               </DropdownMenuItem>
@@ -135,7 +140,7 @@ export const NavUser = ({ user }: NavUserProps) => {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => actions.signOut()}>
-              <LogOut />
+              <IconLogout />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
