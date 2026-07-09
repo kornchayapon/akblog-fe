@@ -10,13 +10,13 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-import { Plus, Text } from 'lucide-react';
-
 import { NavItem } from './data/nav-items';
 
 interface NavItemsProps {
   items: NavItem[];
 }
+
+import { IconFileText, IconPlus } from '@tabler/icons-react';
 
 const NavMain = ({ items }: NavItemsProps) => {
   const pathname = usePathname();
@@ -39,11 +39,11 @@ const NavMain = ({ items }: NavItemsProps) => {
                   hover:text-primary-foreground action:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear'
             >
               <Link href='/admin/blogs/create' onClick={handleNavigate}>
-                <Text />
+                <IconFileText />
                 <span>Create Blog</span>
               </Link>
             </SidebarMenuButton>
-            <Plus className='size-4 text-muted-foreground group-data-[collapsible=icon]:hidden' />
+            <IconPlus className='size-4 text-muted-foreground group-data-[collapsible=icon]:hidden' />
           </SidebarMenuItem>
         </SidebarMenu>
 
