@@ -13,10 +13,13 @@ import ErrorCard from '../../common/components/error-card';
 import { DataTable } from '../../common/components/data-table/data-table';
 import { UserColumns } from '../data/user-columns';
 
+import CreateUserDialog from '../components/create-user-dialog';
+
 const PAGE_SIZE = 10;
 
 const UsersView = () => {
   const [pageIndex, setPageIndex] = useState<number>(1);
+  const [openCreateDialog, setOpenCreateDialog] = useState<boolean>(false);
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: [ADMIN_USER_KEY, pageIndex],
@@ -41,11 +44,15 @@ const UsersView = () => {
   } else if (data) {
     content = (
       <div>
+        <CreateUserDialog
+          open={openCreateDialog}
+          onOpenChange={setOpenCreateDialog}
+        />
         <DataTable
           data={Array.isArray(data.results) ? data.results : []}
           columns={UserColumns()}
           createTitle='Create User'
-          onCreate={() => {}}
+          onCreate={() => setOpenCreateDialog(true)}
           // pagination params
           pageCount={data.meta.totalPages}
           pageIndex={pageIndex}
@@ -57,7 +64,7 @@ const UsersView = () => {
   }
 
   return (
-    <div className='min-w-0 max-w-full px-6 pb-3'>      
+    <div className='min-w-0 max-w-full px-6 pb-3'>
       <div className='font-bold'>{content}</div>
     </div>
   );

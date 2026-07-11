@@ -52,3 +52,34 @@ export const fetchUsers = async ({
     handleApiError(error, 'Fetch users error!');
   }
 };
+
+// create user
+export type CreateUserPayload = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: string;
+};
+
+export const createUser = async ({
+  payload,
+}: {
+  payload: CreateUserPayload;
+}) => {
+  try {
+    const res = await apiClient.post('/users', payload);
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch users error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Create user error!');
+  }
+};
