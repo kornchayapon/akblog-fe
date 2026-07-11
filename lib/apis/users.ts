@@ -36,17 +36,6 @@ export const fetchUsers = async ({
       validateStatus: () => true, // don't reply throw error, I will handle later
     });
 
-    // Error response?
-    if (res.status < 200 || res.status >= 300) {
-      const message =
-        (res.data as { message?: string } | undefined)?.message ??
-        'Fetch users error!';
-      throw new Error(message);
-    }
-
-    // Success Response
-    console.log('[FETCH_USERS]: ', res.data);
-
     return res.data;
   } catch (error: unknown) {
     handleApiError(error, 'Fetch users error!');
@@ -70,16 +59,57 @@ export const createUser = async ({
   try {
     const res = await apiClient.post('/users', payload);
 
-    // Error response?
-    if (res.status < 200 || res.status >= 300) {
-      const message =
-        (res.data as { message?: string } | undefined)?.message ??
-        'Fetch users error!';
-      throw new Error(message);
-    }
-
     return res.data;
   } catch (error: unknown) {
     handleApiError(error, 'Create user error!');
+  }
+};
+
+// get user by id
+interface FetchUserParams {
+  userId?: number | null;
+  signal?: AbortSignal;
+}
+
+export const fetchUser = async ({ userId, signal }: FetchUserParams) => {
+  if (!userId) throw new Error('User ID is required');
+
+  try {
+    const res = await apiClient.get(`/users/${userId}`, { signal });
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Fetch user by ID error!');
+  }
+};
+
+// update user profile
+export type UpdateUserPayload = {
+  userId: number | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  password?: string | null;
+  role?: string | null;
+  avatar?: number | null;
+  active?: boolean | null;
+};
+
+// update user
+export const updateUser = async ({
+  payload,
+}: {
+  payload: UpdateUserPayload;
+}) => {
+  if (!payload.userId) {
+    throw new Error('User ID is required!');
+  }
+
+  try {
+    const res = await apiClient.patch(`/users`, payload);
+
+    return res.data;
+  } catch (error: unknown) {    
+    handleApiError(error, 'Update user error!');
   }
 };

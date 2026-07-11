@@ -10,13 +10,21 @@ import { Badge } from '@/components/ui/badge';
 
 import {
   IconCircleCheckFilled,
-  IconCircleXFilled,  
+  IconCircleXFilled,
+  IconDotsVertical,
   IconGripVertical,
 } from '@tabler/icons-react';
 
 import { useSortable } from '@dnd-kit/sortable';
 
 import { userColumnSchema } from '../schemas/user-column-schema';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {
@@ -38,9 +46,9 @@ function DragHandle({ id }: { id: number }) {
   );
 }
 
-export const UserColumns = (): ColumnDef<
-  z.infer<typeof userColumnSchema>
->[] => [
+export const UserColumns = (
+  onEdit: (id: number) => void,
+): ColumnDef<z.infer<typeof userColumnSchema>>[] => [
   {
     id: 'drag',
     header: () => null,
@@ -174,5 +182,26 @@ export const UserColumns = (): ColumnDef<
         </Badge>
       );
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
+          >
+            <IconDotsVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end' className='w-40'>
+          <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
+            Update
+          </DropdownMenuItem>                    
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
   },
 ];
