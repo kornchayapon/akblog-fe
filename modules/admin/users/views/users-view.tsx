@@ -14,12 +14,15 @@ import { DataTable } from '../../common/components/data-table/data-table';
 import { UserColumns } from '../data/user-columns';
 
 import CreateUserDialog from '../components/create-user-dialog';
+import UpdateUserDialog from '../components/update-user-dialog';
 
 const PAGE_SIZE = 10;
 
 const UsersView = () => {
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [openCreateDialog, setOpenCreateDialog] = useState<boolean>(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState<boolean>(false);
+  const [userId, setUserId] = useState<number | null>(null);
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: [ADMIN_USER_KEY, pageIndex],
@@ -33,7 +36,21 @@ const UsersView = () => {
     placeholderData: (previousData) => previousData,
   });
 
+  const handleUpdateDialogOpenChange = (nextOpen: boolean) => {
+    setOpenUpdateDialog(nextOpen);
+    if (!nextOpen) {
+      setUserId(null);
+    }
+  };
+
+  // from user column
+  const handleUpdate = (id: number) => {
+    setUserId(id);
+    setOpenUpdateDialog(true);
+  };
+
   let content: React.ReactNode;
+
   if (isPending && !data) {
     content = <TableSkeleton />;
   } else if (isError) {
@@ -48,9 +65,14 @@ const UsersView = () => {
           open={openCreateDialog}
           onOpenChange={setOpenCreateDialog}
         />
+        <UpdateUserDialog
+          userId={userId}
+          open={openUpdateDialog}
+          onOpenChange={handleUpdateDialogOpenChange}
+        />
         <DataTable
           data={Array.isArray(data.results) ? data.results : []}
-          columns={UserColumns()}
+          columns={UserColumns(handleUpdate)}
           createTitle='Create User'
           onCreate={() => setOpenCreateDialog(true)}
           // pagination params

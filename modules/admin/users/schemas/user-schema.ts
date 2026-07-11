@@ -9,3 +9,13 @@ export const CreateUserSchema = z.object({
 });
 
 export type CreateUserFormValues = z.infer<typeof CreateUserSchema>;
+
+export const UpdateUserSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.email().optional(),
+  password: z.string().optional(),
+  role: z.string(),
+});
+
+export type UpdateUserFormValues = z.infer<typeof UpdateUserSchema>;

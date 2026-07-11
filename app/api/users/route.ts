@@ -4,15 +4,19 @@ import {
   isStaffFromCookies,
   staffForbiddenResponse,
 } from '@/lib/auth/staff-cookie';
-import { checkAxiosError } from '@/lib/functions/check-axios-error';
+
 import { apiServer } from '@/lib/axios/axios';
 
-import { CreateUserSchema } from '@/modules/admin/users/schemas/user-schema';
+import {
+  CreateUserSchema,
+  UpdateUserSchema,
+} from '@/modules/admin/users/schemas/user-schema';
+import { RemoveNullFields } from '@/lib/functions/remove-null-fields';
 
 // get all users
 export const GET = async (req: Request) => {
   console.log('yes i do');
-  
+
   if (await isStaffFromCookies()) {
     return staffForbiddenResponse();
   }
@@ -48,21 +52,17 @@ export const GET = async (req: Request) => {
 
     // Error response?
     if (res.status < 200 || res.status >= 300) {
-      return NextResponse.json(res.data, { status: res.status });
+      return NextResponse.json(
+        {
+          message: res.data.detail,
+        },
+        { status: res.status },
+      );
     }
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (error: unknown) {
-    if (checkAxiosError(error)) {
-      const status = error.response.status ?? 500;
-      const data = error.response.data ?? {
-        message: 'Backend Error, Get users error!',
-      };
-
-      return NextResponse.json(data, { status });
-    }
-
-    return NextResponse.json({ message: 'Get users error!' }, { status: 500 });
+    console.log('[api proxy > get all users error]:', error);
   }
 };
 
@@ -87,7 +87,10 @@ export const POST = async (req: Request) => {
     const validatedData = CreateUserSchema.safeParse(body);
 
     if (!validatedData.success) {
-      console.log('[proxy: users]: validatedData: ', validatedData.error.issues);
+      console.log(
+        '[proxy: users]: validatedData: ',
+        validatedData.error.issues,
+      );
 
       return NextResponse.json(
         { message: 'Data invalid!', errors: validatedData.error.issues },
@@ -104,23 +107,75 @@ export const POST = async (req: Request) => {
 
     // Error response?
     if (res.status < 200 || res.status >= 300) {
-      return NextResponse.json(res.data, { status: res.status });
+      return NextResponse.json(
+        {
+          message: res.data.detail,
+        },
+        { status: res.status },
+      );
     }
 
     return NextResponse.json(res.data, { status: 201 });
   } catch (error: unknown) {
-    if (checkAxiosError(error)) {
-      const status = error.response.status ?? 500;
-      const data = error.response.data ?? {
-        message: 'Backend Error, Create user error!',
-      };
+    console.log('[api proxy > create user error]:', error);
+  }
+};
 
-      return NextResponse.json(data, { status });
+// update user
+export const PATCH = async (req: Request) => {
+  if (await isStaffFromCookies()) {
+    return staffForbiddenResponse();
+  }
+
+  const authHeader = req.headers.get('authorization');
+
+  if (!authHeader) {
+    return NextResponse.json(
+      { message: 'Authorization Header not found!' },
+      { status: 401 },
+    );
+  }
+
+  try {
+    const body = await req.json();
+
+    const validatedData = UpdateUserSchema.safeParse(body);
+
+    if (!validatedData.success) {
+      console.log(
+        '[proxy: users]: validatedData: ',
+        validatedData.error.issues,
+      );
+
+      return NextResponse.json(
+        { message: 'Data invalid!', errors: validatedData.error.issues },
+        { status: 400 },
+      );
     }
 
-    return NextResponse.json(
-      { message: 'Create user error!' },
-      { status: 500 },
-    );
+    const userObj = RemoveNullFields(body, 'userId');
+
+    console.log('[user patch]: ', body, userObj);
+
+    const res = await apiServer.patch(`/users/${body.userId}`, userObj, {
+      headers: {
+        Authorization: authHeader,
+      },
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      return NextResponse.json(
+        {
+          message: res.data.detail,
+        },
+        { status: res.status },
+      );
+    }
+
+    return NextResponse.json(res.data, { status: 200 });
+  } catch (error: unknown) {
+    console.log('[api proxy > update user error]:', error);
   }
 };
