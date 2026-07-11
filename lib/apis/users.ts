@@ -113,3 +113,45 @@ export const updateUser = async ({
     handleApiError(error, 'Update user error!');
   }
 };
+
+// soft delete
+export const softDeleteUser = async ({ userId }: { userId: number | null }) => {
+  if (!userId) throw new Error('User ID is required');
+
+  try {
+    const res = await apiClient.delete(`/users/${userId}`);
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch users error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Soft delete user error!');
+  }
+};
+
+// restore user
+export const restoreUser = async ({ userId }: { userId: number | null }) => {
+  if (!userId) throw new Error('User ID is required');
+
+  try {
+    const res = await apiClient.patch(`/users/${userId}/restore`);
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch users error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error) {
+    handleApiError(error, 'Restore user error!');
+  }
+};

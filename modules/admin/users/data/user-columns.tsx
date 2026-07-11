@@ -48,6 +48,8 @@ function DragHandle({ id }: { id: number }) {
 
 export const UserColumns = (
   onEdit: (id: number) => void,
+  onSoftDelete: (id: number) => void,
+  onRestore: (id: number) => void,
 ): ColumnDef<z.infer<typeof userColumnSchema>>[] => [
   {
     id: 'drag',
@@ -199,7 +201,22 @@ export const UserColumns = (
         <DropdownMenuContent align='end' className='w-40'>
           <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
             Update
-          </DropdownMenuItem>                    
+          </DropdownMenuItem>
+          {row.original.deletedAt ? (
+            <DropdownMenuItem
+              variant='destructive'
+              onClick={() => onRestore(row.original.id)}
+            >
+              Restore
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              variant='destructive'
+              onClick={() => onSoftDelete(row.original.id)}
+            >
+              Soft Delete
+            </DropdownMenuItem>
+          )}                  
         </DropdownMenuContent>
       </DropdownMenu>
     ),
