@@ -50,6 +50,9 @@ export const UserColumns = (
   onEdit: (id: number) => void,
   onSoftDelete: (id: number) => void,
   onRestore: (id: number) => void,
+  onPermanentDelete: (id: number) => void,
+  onToggleActive: (id: number, nextActive: boolean) => void,
+  isToggleActivePending = false,
 ): ColumnDef<z.infer<typeof userColumnSchema>>[] => [
   {
     id: 'drag',
@@ -186,6 +189,26 @@ export const UserColumns = (
     },
   },
   {
+    id: 'activeToggle',
+    header: 'Enabled',
+    cell: ({ row }) => (
+      <div className='flex items-center justify-center'>
+        <Checkbox
+          id={`active-toggle-${row.original.id}`}
+          checked={row.original.active}
+          disabled={!!row.original.deletedAt || isToggleActivePending}
+          onCheckedChange={(value) => {
+            if (row.original.deletedAt) return;
+            onToggleActive(row.original.id, !!value);
+          }}
+          aria-label={
+            row.original.active ? 'Deactivate this user' : 'Activate this user'
+          }
+        />
+      </div>
+    ),
+  },
+  {
     id: 'actions',
     cell: ({ row }) => (
       <DropdownMenu>
@@ -216,7 +239,13 @@ export const UserColumns = (
             >
               Soft Delete
             </DropdownMenuItem>
-          )}                  
+          )}
+          <DropdownMenuItem
+            variant='destructive'
+            onClick={() => onPermanentDelete(row.original.id)}
+          >
+            Delete
+          </DropdownMenuItem>          
         </DropdownMenuContent>
       </DropdownMenu>
     ),

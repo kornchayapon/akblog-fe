@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { ADMIN_USER_KEY } from '@/lib/constants/query-key';
-import { fetchUsers, restoreUser, softDeleteUser } from '@/lib/apis/users';
+import { deletePermanentUser, fetchUsers, restoreUser, softDeleteUser, updateUserStatus } from '@/lib/apis/users';
 
 import TableSkeleton from '../../common/components/data-table/table-skeleton';
 import ErrorCard from '../../common/components/error-card';
@@ -27,6 +27,10 @@ const UsersView = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState<boolean>(false);
   const [openConfirmSoftDeleteDialog, setOpenConfirmSoftDeleteDialog] =
     useState<boolean>(false);
+  const [
+    openConfirmPermanentDeleteDialog,
+    setOpenConfirmPermanentDeleteDialog,
+  ] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
 
   const { data, isPending, isError, error, isFetching, refetch } = useQuery({
@@ -85,6 +89,52 @@ const UsersView = () => {
     },
   });
 
+  // permanent delete
+  const { mutate: deletePermanentMutate, isPending: isDeletePermanentPending } =
+    useMutation({
+      mutationFn: deletePermanentUser,
+      onSuccess: () => {
+        toast.success('Delete user successful');
+        setOpenConfirmPermanentDeleteDialog(false);
+        refetch();
+      },
+      onError: (error: unknown) => {
+        const err = error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+        const message =
+          err.response?.data?.message ||
+          err.message ||
+          'Delete user error (mutation)';
+
+        toast.error(message);
+      },
+    });
+
+  // toggle active
+  const { mutate: toggleActiveMutate, isPending: isToggleActivePending } =
+    useMutation({
+      mutationFn: ({ userId, active }: { userId: number; active: boolean }) =>
+        updateUserStatus({ payload: { userId, active } }),
+      onSuccess: () => {
+        toast.success('Update user status successful');
+        refetch();
+      },
+      onError: (error: unknown) => {
+        const err = error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+        const message =
+          err.response?.data?.message ||
+          err.message ||
+          'Delete user error (mutation)';
+
+        toast.error(message);
+      },
+    });
+
   const handleUpdateDialogOpenChange = (nextOpen: boolean) => {
     setOpenUpdateDialog(nextOpen);
     if (!nextOpen) {
@@ -107,12 +157,28 @@ const UsersView = () => {
     restoreMutate({ userId: id });
   };
 
+  const handleConfirmPermanentDelete = () => {
+    if (userId) {
+      deletePermanentMutate({ userId });
+    }
+  };
+
+  const handleToggleActive = (userId: number, nextActive: boolean) => {
+    toggleActiveMutate({ userId, active: nextActive });
+  };
+
   // from dialog
   const handleConfirmSoftDelete = () => {
     if (userId) {
       softDeleteMutate({ userId });
     }
   };
+
+  const handleDeletePermanent = (id: number) => {
+    setUserId(id);
+    setOpenConfirmPermanentDeleteDialog(true);
+  };
+  
 
   let content: React.ReactNode;
 
@@ -130,11 +196,13 @@ const UsersView = () => {
           open={openCreateDialog}
           onOpenChange={setOpenCreateDialog}
         />
+
         <UpdateUserDialog
           userId={userId}
           open={openUpdateDialog}
           onOpenChange={handleUpdateDialogOpenChange}
         />
+
         {/* Soft Delete */}
         <ConfirmDeleteDialog
           open={openConfirmSoftDeleteDialog}
@@ -144,9 +212,26 @@ const UsersView = () => {
           header='Confirm Deletion?'
           description='Move this user to trash? You can restore it later.'
         />
+
+        {/* Permanent delete */}
+        <ConfirmDeleteDialog
+          open={openConfirmPermanentDeleteDialog}
+          onConfirm={handleConfirmPermanentDelete}
+          onClose={() => setOpenConfirmPermanentDeleteDialog(false)}
+          isLoading={isDeletePermanentPending}
+          header='Confirm Permanent Deletion?'
+          description={`This will be permanently deleted. You cannot restore it.!`}
+        />
         <DataTable
           data={Array.isArray(data.results) ? data.results : []}
-          columns={UserColumns(handleUpdate, handleSoftDelete, handleRestore)}
+          columns={UserColumns(
+            handleUpdate,
+            handleSoftDelete,
+            handleRestore,
+            handleDeletePermanent,
+            handleToggleActive,
+            isToggleActivePending       
+          )}
           createTitle='Create User'
           onCreate={() => setOpenCreateDialog(true)}
           // pagination params
