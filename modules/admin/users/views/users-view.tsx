@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -18,6 +18,7 @@ import UpdateUserDialog from '../components/update-user-dialog';
 import ConfirmDeleteDialog from '../../common/components/confirm-delete-dialog';
 
 import { toast } from 'sonner';
+import { useHeader } from '../../common/stores/header';
 
 const PAGE_SIZE = 10;
 
@@ -33,7 +34,13 @@ const UsersView = () => {
   ] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
 
-  const { data, isPending, isError, error, isFetching, refetch } = useQuery({
+  const setTitle = useHeader((state) => state.setTitle);
+
+  useEffect(() => {
+    setTitle('User management');
+  }, [setTitle]);
+
+  const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: [ADMIN_USER_KEY, pageIndex],
     queryFn: () =>
       fetchUsers({
