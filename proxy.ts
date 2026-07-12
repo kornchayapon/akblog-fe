@@ -4,7 +4,7 @@ import { isStaffRestrictedAdminPath } from './lib/constants/staff-restricted-adm
 
 const ALLOWED_ROLES = ['admin', 'staff'];
 
-export const middleware = (request: NextRequest) => {
+export const proxy = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
 
   // check the permission
