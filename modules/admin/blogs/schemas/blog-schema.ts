@@ -6,3 +6,10 @@ export const CreateBlogSchema = z.object({
 });
 
 export type CreateBlogFormValues = z.infer<typeof CreateBlogSchema>;
+
+export const UpdateBlogSchema = z.object({
+  title: z.string().optional().nullable(),
+  category: z.number().optional().nullable(),
+});
+
+export type UpdateBlogFormValues = z.infer<typeof UpdateBlogSchema>;

@@ -2,6 +2,8 @@ import apiClient from "../axios/axios";
 
 import { handleApiError } from "../functions/handle-api-error";
 
+import { PublishStatusEnum } from "../enums/publish-status.enum";
+
 export type AdminBlogListSortOrder = 'ASC' | 'DESC';
 
 export type FetchAdminBlogsParams = Readonly<{
@@ -96,5 +98,80 @@ export const createBlog = async ({
     return res.data;
   } catch (error: unknown) {
     handleApiError(error, 'Create blog error!');
+  }
+};
+
+// update blog
+export type UpdateBlogPayload = {
+  blogId: number | null;
+  title?: string | null;
+  content?: string | null;
+  category?: number | null;
+  status?: PublishStatusEnum | null;  
+  tags?: number[] | null;
+};
+
+export const updateBlog = async ({
+  payload,
+}: {
+  payload: UpdateBlogPayload;
+}) => {
+  if (!payload.blogId) {
+    throw new Error('Blog ID is required!');
+  }
+
+  try {
+    const res = await apiClient.patch('/blogs', payload, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Update blog error!';
+      throw new Error(message);
+    }
+
+    // Success Response
+    console.log('[UPDATE_BLOG]: ', res.data);
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Update blog error!');
+  }
+};
+
+// fetch blog
+export const fetchBlog = async ({
+  blogId,
+  signal,
+}: {
+  blogId?: number | null;
+  signal?: AbortSignal;
+}) => {
+  if (!blogId) {
+    throw new Error('Blog ID is required!');
+  }
+
+  try {
+    const res = await apiClient.get(`/blogs/${blogId}`, {
+      signal,
+      withCredentials: true,
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blog by ID error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Fetch blog by ID error!');
   }
 };

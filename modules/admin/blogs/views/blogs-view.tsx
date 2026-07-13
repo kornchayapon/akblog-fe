@@ -71,6 +71,13 @@ const BlogsView = () => {
     router.push('/admin/blogs/create');
   }, [router]);
 
+  const handleUpdate = useCallback(
+    (id: number) => {
+      router.push(`/admin/blogs/update/${id}`);
+    },
+    [router],
+  );
+
   let content: React.ReactNode;
 
   if (isPending && !data) {
@@ -85,7 +92,7 @@ const BlogsView = () => {
       <div>
         <DataTable
           data={Array.isArray(data.results) ? data.results : []}
-          columns={BlogColumns()}
+          columns={BlogColumns(handleUpdate)}
           createTitle='Create Blog'
           onCreate={handleCreate}
           pageCount={data.meta.totalPages}
