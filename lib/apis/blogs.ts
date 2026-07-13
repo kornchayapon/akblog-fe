@@ -60,3 +60,41 @@ export const fetchBlogs = async ({
     handleApiError(error, 'Fetch blogs error!');
   }
 };
+
+// create blog
+export type CreateBlogPayload = {
+  title: string;
+  content?: string | null;
+  category?: number | null;
+  thumbnail?: number | null;
+  pictures?: number[] | null;
+  tags?: number[] | null;
+};
+
+export const createBlog = async ({
+  payload,
+}: {
+  payload: CreateBlogPayload;
+}) => {
+  try {
+    const res = await apiClient.post('/blogs', payload, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Create blog error!';
+      throw new Error(message);
+    }
+
+    // Success Response
+    console.log('[CREATE_BLOG]: ', res.data);
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Create blog error!');
+  }
+};

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -31,7 +31,7 @@ const BlogsView = () => {
 
   const router = useRouter();
 
-  const { data, isPending, isError, error, isFetching, refetch } = useQuery({
+  const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: [ADMIN_BLOGS_KEY, pageIndex],
     queryFn: () =>
       fetchBlogs({
@@ -67,6 +67,10 @@ const BlogsView = () => {
     ],
   ); */
 
+  const handleCreate = useCallback(() => {
+    router.push('/admin/blogs/create');
+  }, [router]);
+
   let content: React.ReactNode;
 
   if (isPending && !data) {
@@ -83,7 +87,7 @@ const BlogsView = () => {
           data={Array.isArray(data.results) ? data.results : []}
           columns={BlogColumns()}
           createTitle='Create Blog'
-          onCreate={() => {}}
+          onCreate={handleCreate}
           pageCount={data.meta.totalPages}
           pageIndex={pageIndex}
           onPageChange={setPageIndex}
