@@ -6,10 +6,18 @@ import { Button } from '@/components/ui/button';
 
 import { blogColumnSchema } from '../schemas/blog-column-schema';
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 import { PublishStatusEnum } from '@/lib/enums/publish-status.enum';
 import {
   IconCircleCheckFilled,
-  IconCircleXFilled,  
+  IconCircleXFilled,
+  IconDotsVertical,
   IconGripVertical,
 } from '@tabler/icons-react';
 
@@ -19,15 +27,24 @@ import { Badge } from '@/components/ui/badge';
 
 type BadgeVariant = 'default' | 'secondary' | 'outline';
 
-const STATUS_CONFIG: Record<PublishStatusEnum, { label: string; variant: BadgeVariant }> = {
+const STATUS_CONFIG: Record<
+  PublishStatusEnum,
+  { label: string; variant: BadgeVariant }
+> = {
   [PublishStatusEnum.DRAFT]: { label: 'Draft', variant: 'outline' },
   [PublishStatusEnum.PUBLISHED]: { label: 'Published', variant: 'default' },
   [PublishStatusEnum.ARCHIVED]: { label: 'Archived', variant: 'secondary' },
 };
 
-function getStatusConfig(status: string | null | undefined): { label: string; variant: BadgeVariant } {
+function getStatusConfig(status: string | null | undefined): {
+  label: string;
+  variant: BadgeVariant;
+} {
   const key = status as PublishStatusEnum | undefined;
-  return STATUS_CONFIG[key ?? PublishStatusEnum.DRAFT] ?? STATUS_CONFIG[PublishStatusEnum.DRAFT];
+  return (
+    STATUS_CONFIG[key ?? PublishStatusEnum.DRAFT] ??
+    STATUS_CONFIG[PublishStatusEnum.DRAFT]
+  );
 }
 
 type BlogStatusCellProps = {
@@ -77,7 +94,9 @@ function DragHandle({ id }: { id: number }) {
   );
 }
 
-export const BlogColumns = (): ColumnDef<z.infer<typeof blogColumnSchema>>[] => [
+export const BlogColumns = (
+  onEdit: (id: number) => void,
+): ColumnDef<z.infer<typeof blogColumnSchema>>[] => [
   {
     id: 'drag',
     header: () => null,
@@ -110,7 +129,7 @@ export const BlogColumns = (): ColumnDef<z.infer<typeof blogColumnSchema>>[] => 
     ),
     enableSorting: false,
     enableHiding: false,
-  },  
+  },
   {
     accessorKey: 'title',
     header: 'Blog Title',
@@ -156,7 +175,32 @@ export const BlogColumns = (): ColumnDef<z.infer<typeof blogColumnSchema>>[] => 
     accessorKey: 'available',
     header: 'Status',
     cell: ({ row }) => (
-      <BlogStatusCell status={row.original.status} deletedAt={row.original.deletedAt} />
+      <BlogStatusCell
+        status={row.original.status}
+        deletedAt={row.original.deletedAt}
+      />
     ),
-  }
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
+          >
+            <IconDotsVertical />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align='end' className='w-40'>
+          <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
+            Edit
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
 ];

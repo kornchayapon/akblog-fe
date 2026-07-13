@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { apiServer } from "@/lib/axios/axios";
-import { CreateBlogSchema } from "@/modules/admin/blogs/schemas/blog-schema";
+import { apiServer } from '@/lib/axios/axios';
+import { CreateBlogSchema, UpdateBlogSchema } from '@/modules/admin/blogs/schemas/blog-schema';
+import { RemoveNullFields } from '@/lib/functions/remove-null-fields';
 
 // get all blogs
 export const GET = async (req: Request) => {
@@ -76,7 +77,10 @@ export const POST = async (req: Request) => {
     const validatedData = CreateBlogSchema.safeParse(body);
 
     if (!validatedData.success) {
-      console.log('[proxy: blogs]: validatedData: ', validatedData.error.issues);
+      console.log(
+        '[proxy: blogs]: validatedData: ',
+        validatedData.error.issues,
+      );
 
       return NextResponse.json(
         { message: 'Data invalid!', errors: validatedData.error.issues },
@@ -103,6 +107,58 @@ export const POST = async (req: Request) => {
 
     return NextResponse.json(res.data, { status: 201 });
   } catch (error: unknown) {
-   console.log('[api proxy > create blog error]:', error);
+    console.log('[api proxy > create blog error]:', error);
+  }
+};
+
+// update blog
+export const PATCH = async (req: Request) => {
+  const authHeader = req.headers.get('authorization');
+
+  if (!authHeader) {
+    return NextResponse.json(
+      { message: 'Authorization Header not found!' },
+      { status: 401 },
+    );
+  }
+
+  try {
+    const body = await req.json();
+
+    const validatedData = UpdateBlogSchema.safeParse(body);
+
+    if (!validatedData.success) {
+      console.log('[proxy: blogs]: validatedData: ', validatedData.error.issues);
+
+      return NextResponse.json(
+        { message: 'Data invalid!', errors: validatedData.error.issues },
+        { status: 400 },
+      );
+    }
+
+    const blogObj = RemoveNullFields(body, 'blogId');
+
+    console.log('[blog patch]: ', body, blogObj);
+
+    const res = await apiServer.patch(`/blogs/${body.blogId}`, blogObj, {
+      headers: {
+        Authorization: authHeader,
+      },
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      return NextResponse.json(
+        {
+          message: res.data.detail,
+        },
+        { status: res.status },
+      );
+    }
+
+    return NextResponse.json(res.data, { status: 200 });
+  } catch (error: unknown) {
+    console.log('[api proxy > update blog error]:', error);
   }
 };
