@@ -175,3 +175,107 @@ export const fetchBlog = async ({
     handleApiError(error, 'Fetch blog by ID error!');
   }
 };
+
+// soft delete
+export const softDeleteBlog = async ({ blogId }: { blogId: number | null }) => {
+  if (!blogId) throw new Error('Blog ID is required');
+
+  try {
+    const res = await apiClient.delete(`/blogs/${blogId}`);
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blogs error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Soft delete blog error!');
+  }
+};
+
+// restore blog
+export const restoreBlog = async ({ blogId }: { blogId: number | null }) => {
+  if (!blogId) throw new Error('Blog ID is required');
+
+  try {
+    const res = await apiClient.patch(`/blogs/${blogId}/restore`);
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blogs error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error) {
+    handleApiError(error, 'Restore blog error!');
+  }
+};
+
+// permanent delete blog
+export const deletePermanentBlog = async ({
+  blogId,
+}: {
+  blogId: number | null;
+}) => {
+  if (!blogId) throw new Error('Blog ID is required');
+
+  try {
+    const res = await apiClient.delete(`/blogs/${blogId}/permanent`, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blogs error!';
+      throw new Error(message);
+    }
+
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Permanent delete blog error!');
+  }
+};
+
+// update blog status
+export const updateBlogStatus = async ({
+  blogId,
+  status,
+}: {
+  blogId: number;
+  status: PublishStatusEnum;
+}) => {
+  if (!blogId) {
+    throw new Error('Blog ID is required!');
+  }
+
+  try {
+    const res = await apiClient.patch(`/blogs/${blogId}/status`, { status }, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Update blog status error!';
+      throw new Error(message);
+    }
+
+    // Success Response
+    console.log('[UPDATE_BLOG_STATUS]: ', res.data);
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Update blog status error!');
+  }
+};
