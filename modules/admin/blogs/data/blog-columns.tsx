@@ -10,6 +10,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -96,6 +100,10 @@ function DragHandle({ id }: { id: number }) {
 
 export const BlogColumns = (
   onEdit: (id: number) => void,
+  onSoftDelete: (id: number) => void,
+  onRestore: (id: number) => void,
+  onDelete: (id: number) => void,
+  onStatusChange: (id: number, status: PublishStatusEnum) => void,
 ): ColumnDef<z.infer<typeof blogColumnSchema>>[] => [
   {
     id: 'drag',
@@ -196,8 +204,63 @@ export const BlogColumns = (
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align='end' className='w-40'>
-          <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
-            Edit
+          {!row.original.deletedAt && (
+            <div>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      onStatusChange(row.original.id, PublishStatusEnum.DRAFT)
+                    }
+                  >
+                    Set as Draft
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      onStatusChange(
+                        row.original.id,
+                        PublishStatusEnum.PUBLISHED,
+                      )
+                    }
+                  >
+                    Set as Published
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      onStatusChange(
+                        row.original.id,
+                        PublishStatusEnum.ARCHIVED,
+                      )
+                    }
+                  >
+                    Set as Archived
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </div>
+          )}
+          {row.original.deletedAt ? (
+            <DropdownMenuItem onClick={() => onRestore(row.original.id)}>
+              Restore
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              variant='destructive'
+              onClick={() => onSoftDelete(row.original.id)}
+            >
+              Soft Delete
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem
+            variant='destructive'
+            onClick={() => onDelete(row.original.id)}
+          >
+            Permanent Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
