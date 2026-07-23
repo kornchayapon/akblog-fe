@@ -34,6 +34,9 @@ import BreadcrumbNav, {
 } from '../../common/components/breadcrumb-nav';
 import SavePending from '../components/save-pending';
 import FormErrorMessage from '@/modules/guest/common/components/form-error-message';
+import ImageView from '../../common/components/image-view';
+import UploadThumbnail from '../../common/components/upload-thumbnail';
+import UploadPictures from '../../common/components/upload-pictures';
 
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -42,8 +45,10 @@ import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 
 import { Category } from '@/lib/interfaces/category';
-
 import { fetchBlog, updateBlog, UpdateBlogPayload } from '@/lib/apis/blogs';
+import { Picture } from '@/lib/interfaces/picture';
+import { handleApiError } from '@/lib/functions/handle-api-error';
+import { uploadPictures } from '@/lib/apis/pictures';
 
 const navItems: BreadcrumbNavItem[] = [
   { href: '/admin', children: 'Home', type: 'link' },
@@ -55,8 +60,20 @@ interface UpdateBlogViewProps {
   blogId: string;
 }
 
+export type Thumbnail = {
+  id: number | null;
+  path: string | null;
+  file: File | null;
+};
+
 const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Picture[]>([]);
+  const [thumbnail, setThumbnail] = useState<Thumbnail>({
+    id: null,
+    path: null,
+    file: null,
+  });
   const [tags, setTags] = useState<TagsState[]>([]);
 
   const {
@@ -80,7 +97,7 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
         setErrorMessage(null);
       });
     }
-  }, [isDirty]);
+  }, [isDirty]);  
 
   // get blog
   const {
@@ -126,6 +143,26 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
         category: blogData.category.id,
       });
 
+      // thumbnail
+      if (blogData.thumbnail) {
+        const thumbnailData = blogData.thumbnail;
+        startTransition(() => {
+          setThumbnail({
+            id: thumbnailData.id,
+            path: thumbnailData.path,
+            file: null,
+          });
+        });
+      }
+
+      // upload pictures
+      const { pictures } = blogData;
+      if (pictures && pictures.length) {
+        startTransition(() => {
+          setUploadedFiles(pictures);
+        });
+      }
+
       // tags
       const { tags } = blogData;
       if (tags && tags.length) {
@@ -164,18 +201,54 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
     },
   });
 
-  const onSubmit = () => {
+  // Upload Mutation
+  const uploadThumbnailMutation = useMutation({
+    mutationFn: (file: File) => uploadPictures([file]),
+    onSuccess: (data: Picture[]) => {
+      const image = data[0];
+      if (image) {
+        setErrorMessage(null);
+        submitBlog(image.id);
+      }
+    },
+    onError: (error) => {
+      handleApiError(error, 'Upload thumbnail error!');
+    },
+  });
+
+  const submitBlog = (thumbnailId: number | null) => {
     const values = getValues();
     const payload: UpdateBlogPayload = {
       ...values,
       blogId: parseInt(blogId),
       category: values.category || 0,
       content: editorRef.current?.getContent() || '',
+      thumbnail: thumbnailId,
+      pictures: uploadedFiles.map((pic) => pic.id),
       tags: tags.map((tag) => tag.id),
     };
 
     mutate(payload);
   };
+
+  const onSubmit = () => {
+    if (thumbnail.file) {
+      uploadThumbnailMutation.mutate(thumbnail.file);
+    } else {
+      // no image
+      submitBlog(null);
+    }
+  };
+
+  const handleInsertImage = (imagePath: string) => {
+    if (editorRef.current) {
+      editorRef.current.insertContent(
+        `<img src="${imagePath}" alt="Inserted Image" style="max-width: 100%; height: auto;" />`,
+      );
+    }
+  };
+
+  const isSaving = isPending || uploadThumbnailMutation.isPending;
 
   let content: React.ReactNode;
 
@@ -206,7 +279,7 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
   if (categoriesData && blogData && tagsData) {
     content = (
       <div className='min-w-0 max-w-full p-6'>
-        <SavePending isSaving={isPending} message='Update blog ...' />
+        <SavePending isSaving={isSaving} message='Update blog ...' />
 
         <div className='font-bold'>Update Blog</div>
         <div className='pt-4'>
@@ -218,7 +291,7 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
             // onSubmit={handleSubmit(onSubmit)}
             onSubmit={(event) => handleSubmit(onSubmit)(event)}
             className={`grid gap-4 ${
-              isPending ? 'pointer-events-none opacity-70' : ''
+              isSaving ? 'pointer-events-none opacity-70' : ''
             }`}
           >
             <div className='grid gap-3'>
@@ -226,7 +299,7 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
               <Input
                 id='title'
                 {...register('title')}
-                disabled={isPending}
+                disabled={isSaving}
                 placeholder='Blog title'
               />
               <FormFieldError message={errors.title?.message} />
@@ -251,7 +324,7 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
                         <SelectOptions
                           value={field.value}
                           onValueChange={field.onChange}
-                          disabled={isPending}
+                          disabled={isSaving}
                           options={options}
                           id='category'
                           placeholder='Select a category'
@@ -262,7 +335,43 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
                   <FormFieldError message={errors.category?.message} />
                 </div>
               </div>
+
+              <div className='grid gap-3'>
+                {/* Upload Thumbnail Component */}
+                {thumbnail.id && thumbnail.path ? (
+                  <div className='w-full p-6 space-y-4 border rounded-lg shadow-sm'>
+                    <div className='text-sm font-medium'>Upload Thumbnail</div>
+                    <div className='xl:w-75'>
+                      <ImageView
+                        imageId={thumbnail.id}
+                        imagePath={thumbnail.path}
+                        clearUpload={() => {
+                          setThumbnail({
+                            id: null,
+                            path: null,
+                            file: null,
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <UploadThumbnail
+                    uploadMutation={uploadThumbnailMutation}
+                    setSelectedFile={(file) =>
+                      setThumbnail((prev) => ({ ...prev, file }))
+                    }
+                  />
+                )}
+              </div>
             </div>
+
+            {/* Upload Pictures */}
+            <UploadPictures
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles}
+              onInsert={handleInsertImage}
+            />
 
             {/* Tags Input */}
             <TagsInput
@@ -285,13 +394,13 @@ const UpdateBlogView = ({ blogId }: UpdateBlogViewProps) => {
               <Button
                 variant='outline'
                 type='button'
-                disabled={isPending}
+                disabled={isSaving}
                 onClick={() => router.back()}
               >
                 Cancel
               </Button>
               <Button type='submit'>
-                {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                {isSaving && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 Save changes
               </Button>
             </div>

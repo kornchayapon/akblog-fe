@@ -187,6 +187,8 @@ const CreateBlogView = () => {
     }
   };
 
+  const isSaving = isPending || uploadThumbnailMutation.isPending;
+
   let content: React.ReactNode;
 
   if (isCategoriesPending || isTagsPending) {
@@ -212,7 +214,7 @@ const CreateBlogView = () => {
   if (categoriesData && tagsData) {
     content = (
       <div className='min-w-0 max-w-full p-6'>
-        <SavePending isSaving={isPending} message='Create blog ...' />
+        <SavePending isSaving={isSaving} message='Create blog ...' />
 
         <div className='font-bold'>Create Blog</div>
         <div className='pt-4'>
@@ -223,7 +225,7 @@ const CreateBlogView = () => {
           <form
             onSubmit={(event) => handleSubmit(onSubmit)(event)}
             className={`grid gap-4 ${
-              isPending ? 'pointer-events-none opacity-70' : ''
+              isSaving ? 'pointer-events-none opacity-70' : ''
             }`}
           >
             <div className='grid gap-3'>
@@ -231,7 +233,7 @@ const CreateBlogView = () => {
               <Input
                 id='title'
                 {...register('title')}
-                disabled={isPending}
+                disabled={isSaving}
                 placeholder='Blog title'
               />
               <FormFieldError message={errors.title?.message} />
@@ -256,7 +258,7 @@ const CreateBlogView = () => {
                         <SelectOptions
                           value={field.value}
                           onValueChange={field.onChange}
-                          disabled={isPending}
+                          disabled={isSaving}
                           options={options}
                           id='category'
                           placeholder='Select a category'
@@ -303,13 +305,13 @@ const CreateBlogView = () => {
               <Button
                 variant='outline'
                 type='button'
-                disabled={isPending}
+                disabled={isSaving}
                 onClick={() => router.back()}
               >
                 Cancel
               </Button>
               <Button type='submit'>
-                {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                {isSaving && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 Save changes
               </Button>
             </div>

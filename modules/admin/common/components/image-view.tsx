@@ -46,6 +46,7 @@ const ImageView = ({
           className='object-cover'
           fill
           sizes='(max-width: 1024px) 100vw, 300px'
+          loading="eager"
         />
       </div>
 
