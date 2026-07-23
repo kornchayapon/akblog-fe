@@ -20,7 +20,6 @@ import { queryClient } from '@/lib/react-query/query-client';
 import {
   ADMIN_BLOGS_KEY,
   ADMIN_CATEGORIES_KEY,
-  ADMIN_TAGS_KEY,
 } from '@/lib/constants/query-key';
 import { fetchTags } from '@/lib/apis/tags';
 import { fetchCategories } from '@/lib/apis/categories';
@@ -35,13 +34,23 @@ import { Loader2 } from 'lucide-react';
 import { SubmitBlogSkeleton } from '../components/submit-blog-skeleton';
 import ErrorCard from '../../common/components/error-card';
 import SavePending from '../components/save-pending';
-import BreadcrumbNav, { BreadcrumbNavItem } from '../../common/components/breadcrumb-nav';
+import BreadcrumbNav, {
+  BreadcrumbNavItem,
+} from '../../common/components/breadcrumb-nav';
 import FormErrorMessage from '@/modules/guest/common/components/form-error-message';
 import FormFieldError from '@/modules/guest/common/components/form-field-error';
-import SelectOptions, { SelectOption } from '../../common/components/select-options';
+import SelectOptions, {
+  SelectOption,
+} from '../../common/components/select-options';
+import UploadThumbnail from '../../common/components/upload-thumbnail';
+import UploadPictures from '../../common/components/upload-pictures';
 
 import { Category } from '@/lib/interfaces/category';
 import { createBlog, CreateBlogPayload } from '@/lib/apis/blogs';
+import { handleApiError } from '@/lib/functions/handle-api-error';
+import { Picture } from '@/lib/interfaces/picture';
+import { uploadPictures } from '@/lib/apis/pictures';
+
 
 const navItems: BreadcrumbNavItem[] = [
   { href: '/admin', children: 'Home', type: 'link' },
@@ -50,7 +59,9 @@ const navItems: BreadcrumbNavItem[] = [
 ];
 
 const CreateBlogView = () => {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Picture[]>([]);
   const [tags, setTags] = useState<TagsState[]>([]);
 
   const {
@@ -113,7 +124,7 @@ const CreateBlogView = () => {
       reset();
       router.push('/admin/blogs');
     },
-    onError: (error: unknown) => {            
+    onError: (error: unknown) => {
       const err = error as {
         response?: { data?: { message?: string } };
         message?: string;
@@ -121,7 +132,7 @@ const CreateBlogView = () => {
       const message =
         err.response?.data?.message ||
         err.message ||
-        'Create blog error (mutation)';        
+        'Create blog error (mutation)';
 
       setErrorMessage(message);
       reset(getValues());
@@ -130,16 +141,50 @@ const CreateBlogView = () => {
     },
   });
 
-  const onSubmit = () => {
+  // Upload Mutation
+  const uploadThumbnailMutation = useMutation({
+    mutationFn: (file: File) => uploadPictures([file]),
+    onSuccess: (data: Picture[]) => {
+      const image = data[0];
+      if (image) {
+        setErrorMessage(null);
+        submitBlog(image.id);
+      }
+    },
+    onError: (error) => {
+      handleApiError(error, 'Upload thumbnail error!');
+    },
+  });
+
+  const handleInsertImage = (imagePath: string) => {
+    if (editorRef.current) {
+      editorRef.current.insertContent(
+        `<img src="${imagePath}" alt="Inserted Image" style="max-width: 100%; height: auto;" />`,
+      );
+    }
+  };
+
+  const submitBlog = (thumbnailId: number | null) => {
     const values = getValues();
     const payload: CreateBlogPayload = {
       ...values,
       category: values.category || 0,
       content: editorRef.current?.getContent() || '',
+      thumbnail: thumbnailId,
+      pictures: uploadedFiles.map((pic) => pic.id),
       tags: tags.map((tag) => tag.id),
     };
 
     mutate(payload);
+  };
+
+  const onSubmit = () => {
+    if (thumbnailFile) {
+      uploadThumbnailMutation.mutate(thumbnailFile);
+    } else {
+      // no image
+      submitBlog(null);
+    }
   };
 
   let content: React.ReactNode;
@@ -160,7 +205,6 @@ const CreateBlogView = () => {
     if (tagsError?.message) {
       message += tagsError?.message;
     }
-    
 
     content = <ErrorCard title={title} message={message} />;
   }
@@ -168,7 +212,6 @@ const CreateBlogView = () => {
   if (categoriesData && tagsData) {
     content = (
       <div className='min-w-0 max-w-full p-6'>
-
         <SavePending isSaving={isPending} message='Create blog ...' />
 
         <div className='font-bold'>Create Blog</div>
@@ -177,7 +220,7 @@ const CreateBlogView = () => {
         </div>
         <div className='pt-10 flex flex-col gap-6'>
           <FormErrorMessage message={errorMessage} />
-          <form            
+          <form
             onSubmit={(event) => handleSubmit(onSubmit)(event)}
             className={`grid gap-4 ${
               isPending ? 'pointer-events-none opacity-70' : ''
@@ -223,8 +266,15 @@ const CreateBlogView = () => {
                   />
                   <FormFieldError message={errors.category?.message} />
                 </div>
-              </div>              
-            </div>           
+              </div>
+              <div className='grid gap-3'>
+                {/* Upload Component */}
+                <UploadThumbnail
+                  uploadMutation={uploadThumbnailMutation}
+                  setSelectedFile={setThumbnailFile}
+                />
+              </div>
+            </div>
 
             {/* Tags Input */}
             <TagsInput
@@ -232,6 +282,13 @@ const CreateBlogView = () => {
               setTags={setTags}
               oldTags={tagsData.results ?? []}
               disabled={isTagsPending}
+            />
+
+            {/* Upload Pictures */}
+            <UploadPictures
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles}
+              onInsert={handleInsertImage}
             />
 
             <div className='pt-5'>
