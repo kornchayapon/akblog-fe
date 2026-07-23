@@ -109,6 +109,8 @@ export type UpdateBlogPayload = {
   category?: number | null;
   status?: PublishStatusEnum | null;  
   tags?: number[] | null;
+  thumbnail?: number | null;
+  pictures?: number[] | null;
 };
 
 export const updateBlog = async ({
@@ -169,6 +171,8 @@ export const fetchBlog = async ({
         'Fetch blog by ID error!';
       throw new Error(message);
     }
+
+    console.log('[FETCH_BLOG]: ', res.data);
 
     return res.data;
   } catch (error: unknown) {
