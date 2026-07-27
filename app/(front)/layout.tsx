@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 
 import { useUser } from '@/modules/guest/auth/hooks/use-user';
 import Footer from '@/modules/guest/common/components/footer';
-import FrontNavbar from '@/modules/guest/common/components/navbar/front-navbar';
+import GuestNavbar from '@/modules/guest/common/components/navbar/guest-navbar';
 import NavbarSkeleton from '@/modules/guest/common/components/navbar/navbar-skeleton';
 import Loading from '@/modules/guest/common/components/loading';
 
@@ -22,7 +22,7 @@ const FrontLayout = ({ children }: Readonly<LayoutProps>) => {
   return (
     <div className='flex flex-col min-h-screen'>
       <Suspense fallback={<NavbarSkeleton />}>
-        <FrontNavbar user={user} />
+        <GuestNavbar user={user} />
       </Suspense>
 
       <main className='flex-1'>{children}</main>
