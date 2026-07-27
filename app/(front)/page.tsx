@@ -1,7 +1,7 @@
+import HomeView from "@/modules/guest/home/views/home-view"
+
 const HomePage = () => {
-  return (
-    <div>Home Page</div>
-  )
+ return <HomeView />
 }
 
 export default HomePage
