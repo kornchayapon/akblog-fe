@@ -66,6 +66,7 @@ const BlogCard = ({ blog }: BlogCardProps): ReactElement => {
             sizes='(max-width: 768px) 100vw, 33vw'
             alt={heroImageAlt}
             className='object-cover transition-transform duration-500 group-hover:scale-105'
+            priority
           />
         </Link>
         <div className='pointer-events-none absolute inset-0 bg-linear-to-t from-black/25 via-black/5 to-transparent' />

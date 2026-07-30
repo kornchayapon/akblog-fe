@@ -1,11 +1,11 @@
-import apiClient from "../axios/axios";
+import apiClient from '../axios/axios';
 
-import { PublishStatusEnum } from "../enums/publish-status.enum";
+import { PublishStatusEnum } from '../enums/publish-status.enum';
 
-import { GuestBlogsResponse } from "../interfaces/guest-blogs";
+import { GuestBlogsResponse } from '../interfaces/guest-blogs';
 
-import { handleApiError } from "../functions/handle-api-error";
-import { Blog, BlogDetail } from "../interfaces/blog";
+import { handleApiError } from '../functions/handle-api-error';
+import { BlogDetail } from '../interfaces/blog';
 
 // get guest all blogs
 export const fetchGuestBlogs = async ({
@@ -56,21 +56,11 @@ export const fetchGuestBlogs = async ({
 export const fetchGuestBlogBySlug = async (
   slug: string,
 ): Promise<BlogDetail | null> => {
-  const trimmed = slug.trim();
-  if (!trimmed) return null;
-
-  // console.log('slug :', trimmed);
-  // console.log('slug en:', encodeURIComponent(trimmed));
-  
-
   try {
-    const res = await apiClient.get(
-      `/guest/blogs/${trimmed}`,
-      {
-        withCredentials: true,
-        validateStatus: () => true,
-      },
-    );
+    const res = await apiClient.get(`/guest/blogs/${slug}`, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
 
     if (res.status === 404) return null;
 
@@ -90,4 +80,102 @@ export const fetchGuestBlogBySlug = async (
   }
 
   throw new Error('Fetch blog by slug error');
+};
+
+// fetch blogs by category slug
+export const fetchBlogsByCategory = async ({
+  page,
+  limit,
+  withDeleted = true,
+  status,
+  slug,
+}: {
+  page: number;
+  limit: number;
+  withDeleted?: boolean;
+  status?: PublishStatusEnum | null;
+  slug: string;
+}): Promise<GuestBlogsResponse> => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      withDeleted: String(withDeleted),
+    });    
+
+    if (status) params.set('status', status);
+
+    // send request to server
+    const res = await apiClient.get(
+      `/guest/${slug}/categories?${params.toString()}`,
+      {
+        withCredentials: true,
+        validateStatus: () => true,
+      },
+    );
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blogs error!';
+      throw new Error(message);
+    }    
+
+    // Success Response
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Fetch blogs by category error');
+  }
+
+  throw new Error('Fetch blogs by category error');
+};
+
+// fetch blogs by tag slug
+export const fetchBlogsByTag = async ({
+  page,
+  limit,
+  withDeleted = true,
+  status,
+  slug,
+}: {
+  page: number;
+  limit: number;
+  withDeleted?: boolean;
+  status?: PublishStatusEnum | null;
+  slug: string;
+}): Promise<GuestBlogsResponse> => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      withDeleted: String(withDeleted),
+    });
+
+    if (status) params.set('status', status);
+
+    // send request to server
+    const res = await apiClient.get(
+      `/guest/${slug}/tags?${params.toString()}`,
+      {
+        withCredentials: true,
+        validateStatus: () => true,
+      },
+    );
+
+    // Error response?
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blogs error!';
+      throw new Error(message);
+    }
+
+    // Success Response
+    return res.data;
+  } catch (error: unknown) {
+    handleApiError(error, 'Fetch blogs by tag error');
+  }
+
+  throw new Error('Fetch blogs by tag error');
 };
