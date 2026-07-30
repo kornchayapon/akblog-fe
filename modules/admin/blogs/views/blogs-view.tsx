@@ -48,6 +48,7 @@ const BlogsView = () => {
         page: pageIndex,
         limit: PAGE_SIZE,
         withDeleted: true,
+        status: PublishStatusEnum.PUBLISHED
       }),
     staleTime: 5000,
     placeholderData: (previousData) => previousData,

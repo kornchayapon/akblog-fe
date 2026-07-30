@@ -53,3 +53,9 @@ export interface Blog {
   thumbnail: BlogThumbnail | null;
   pictures: BlogPicture[];
 }
+
+export interface BlogDetail {
+  currentBlog: Blog;
+  prevBlog: Blog;
+  nextBlog: Blog;
+}
