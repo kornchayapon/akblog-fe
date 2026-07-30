@@ -1,11 +1,13 @@
 import apiClient from "../axios/axios";
 
 import { PublishStatusEnum } from "../enums/publish-status.enum";
+
 import { GuestBlogsResponse } from "../interfaces/guest-blogs";
 
 import { handleApiError } from "../functions/handle-api-error";
+import { Blog, BlogDetail } from "../interfaces/blog";
 
-// get front all blogs
+// get guest all blogs
 export const fetchGuestBlogs = async ({
   page,
   limit,
@@ -48,4 +50,44 @@ export const fetchGuestBlogs = async ({
 
   // handleApiError always throws; this is only for exhaustiveness.
   throw new Error('Fetch blogs error!');
+};
+
+/** Single published blog by slug (public guest). Proxies to GET /api/guest/blogs/:slug. */
+export const fetchGuestBlogBySlug = async (
+  slug: string,
+): Promise<BlogDetail | null> => {
+  const trimmed = slug.trim();
+  if (!trimmed) return null;
+
+  // console.log('slug :', trimmed);
+  // console.log('slug en:', encodeURIComponent(trimmed));
+  
+
+  try {
+    const res = await apiClient.get(
+      `/guest/blogs/${trimmed}`,
+      {
+        withCredentials: true,
+        validateStatus: () => true,
+      },
+    );
+
+    if (res.status === 404) return null;
+
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Fetch blog by slug error';
+      throw new Error(message);
+    }
+
+    // Success Response
+    console.log('[GUEST_BLOG_DETAIL]: ', res.data);
+
+    return res.data as BlogDetail;
+  } catch (error: unknown) {
+    handleApiError(error, 'Fetch blog by slug error');
+  }
+
+  throw new Error('Fetch blog by slug error');
 };
