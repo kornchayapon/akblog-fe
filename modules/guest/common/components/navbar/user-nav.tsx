@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +24,10 @@ import {
 
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { User } from '@/lib/interfaces/user';
+import { getUserAvatarSrc } from '@/lib/utils/user-avatar-src';
+
 import { useAuth } from '@/modules/guest/auth/hooks/use-auth';
+
 
 interface UserNavProps {
   user: User | null;
@@ -35,6 +39,60 @@ interface AuthenticatedUserNavProps {
 
 const GuestUserNav = () => {
   return <div>GuestUserName</div>;
+};
+
+interface UserAvatarProps {
+  user: User;
+  size?: 'small' | 'large';
+}
+
+type AvatarSize = NonNullable<UserAvatarProps['size']>;
+
+const avatarSizeMap: Record<
+  AvatarSize,
+  {
+    container: string;
+    image: { width: number; height: number };
+    fallback: string;
+  }
+> = {
+  small: {
+    container: 'h-9 w-9',
+    image: { width: 40, height: 40 },
+    fallback:
+      'h-9 w-9 rounded-full bg-linear-to-br from-emerald-300 to-emerald-500 flex items-center justify-center text-white font-bold text-sm',
+  },
+  large: {
+    container: 'h-12 w-12',
+    image: { width: 48, height: 48 },
+    fallback:
+      'h-12 w-12 rounded-full bg-linear-to-br from-emerald-300 to-emerald-500 flex items-center justify-center text-white font-bold text-lg',
+  },
+};
+const UserAvatar = ({ user, size = 'small' }: UserAvatarProps) => {
+  const avatarSrc: string = getUserAvatarSrc(user);
+  const sizeConfig = avatarSizeMap[size];
+  // const imageClassName = avatarImageClassNameMap[size];
+
+  if (avatarSrc) {
+    return (
+      <Image
+        src={avatarSrc}
+        about=''
+        alt={user.firstName ?? 'User avatar'}
+        width={sizeConfig.image.width}
+        height={sizeConfig.image.height}
+        className='rounded-full border-2 border-white shadow-sm object-cover'
+        loading='lazy'
+      />
+    );
+  }
+
+  const initial: string = (user.firstName ?? user.email ?? '?')
+    .charAt(0)
+    .toUpperCase();
+
+  return <div className={sizeConfig.fallback}>{initial}</div>;
 };
 
 const AuthenticatedUserNav = ({ user }: AuthenticatedUserNavProps) => {
@@ -50,12 +108,7 @@ const AuthenticatedUserNav = ({ user }: AuthenticatedUserNavProps) => {
             focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-slate-100'
         >
           <div className='relative'>
-            <div
-              className='h-9 w-9 border border-dashed border-slate-300 transition-color 
-              rounded-full flex items-center justify-center hover:border-slate-400'
-            >
-              <UserIcon className='h-5 w-5' />
-            </div>
+            <UserAvatar user={user} size='small' />
             <span className='absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500'></span>
           </div>
         </Button>
@@ -68,15 +121,7 @@ const AuthenticatedUserNav = ({ user }: AuthenticatedUserNavProps) => {
       >
         <DropdownMenuLabel className='font-normal p-0'>
           <div className='flex items-center gap-3 p-3'>
-            <div className='relative'>
-              <div
-                className='h-9 w-9 border border-dashed border-slate-300 transition-color 
-              rounded-full flex items-center justify-center hover:border-slate-400'
-              >
-                <UserIcon className='h-5 w-5' />
-              </div>
-              <span className='absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500'></span>
-            </div>
+            <UserAvatar user={user} size='large' />
             <div className='flex flex-col space-y-0.5 overflow-hidden'>
               <p className='text-base font-bold text-slate-900 truncate'>{`${user.firstName ?? ''} ${
                 user.lastName ?? ''
