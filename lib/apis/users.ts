@@ -75,7 +75,7 @@ export const fetchUser = async ({ userId, signal }: FetchUserParams) => {
   if (!userId) throw new Error('User ID is required');
 
   try {
-    const res = await apiClient.get(`/users/${userId}`, { signal });
+    const res = await apiClient.get(`/users/${userId}`, { signal });    
 
     return res.data;
   } catch (error: unknown) {
@@ -211,3 +211,38 @@ export const deletePermanentUser = async ({
     handleApiError(error, 'Permanent delete user error!');
   }
 };
+
+// update user profile payload
+export type UpdateMyProfilePayload = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  avatar?: number | null;
+};
+
+// update profile
+export async function updateUserProfile({
+  userId,
+  currentRole,
+  payload,
+}: {
+  userId: number;
+  currentRole: string;
+  payload: UpdateMyProfilePayload;
+}) {
+  const body: UpdateUserPayload = {
+    userId,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    email: payload.email,
+    role: currentRole, // read-only: clients cannot change their own role here
+    avatar: payload.avatar ?? undefined,
+  };
+  
+  // Include password only when the user is changing it
+  if (payload.password !== undefined && payload.password !== '') {
+    body.password = payload.password;
+  }
+  return updateUser({ payload: body });
+}
