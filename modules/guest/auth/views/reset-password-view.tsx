@@ -17,10 +17,11 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertCircle,
+  EyeOff,
+  Eye,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { checkAxiosError } from '@/lib/functions/check-axios-error';
-import { useAuth } from '../hooks/use-auth';
 
 const passwordSchema = z
   .object({
@@ -43,7 +44,8 @@ interface ResetPasswordViewProps {
 const ResetPasswordView = ({ token }: ResetPasswordViewProps) => {
   const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { actions } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const verifyToken = useCallback(async () => {
     if (!token) {
@@ -166,8 +168,8 @@ const ResetPasswordView = ({ token }: ResetPasswordViewProps) => {
                 </p>
               </div>
               <Button asChild className='h-12 w-full rounded-2xl font-bold'>
-                <Link href='/' onClick={() => actions.signOut()}>
-                  Go to Login
+                <Link href='/'>
+                  Go to Home
                   <ArrowRight className='ml-2 h-4 w-4' />
                 </Link>
               </Button>
@@ -215,12 +217,27 @@ const ResetPasswordView = ({ token }: ResetPasswordViewProps) => {
                 <div className='group relative'>
                   <Lock className='absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary' />
                   <Input
-                    type='password'
+                    type={showPassword ? 'text' : 'password'}
                     placeholder='••••••••'
                     autoComplete='new-password'
                     className='h-12 rounded-2xl border-0 bg-muted pl-11 focus-visible:ring-2 focus-visible:ring-ring'
                     {...register('password')}
                   />
+                  <button
+                    type='button'
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none'
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className='size-4' />
+                    ) : (
+                      <Eye className='size-4' />
+                    )}
+                  </button>
                 </div>
                 {errors.password && (
                   <p className='text-xs font-bold text-red-500'>
@@ -235,12 +252,29 @@ const ResetPasswordView = ({ token }: ResetPasswordViewProps) => {
                 <div className='group relative'>
                   <Lock className='absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary' />
                   <Input
-                    type='password'
+                    type={showConfirmPassword ? 'text' : 'password'}
                     placeholder='••••••••'
                     autoComplete='new-password'
                     className='h-12 rounded-2xl border-0 bg-muted pl-11 focus-visible:ring-2 focus-visible:ring-ring'
                     {...register('confirmPassword')}
                   />
+                  <button
+                    type='button'
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none'
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    aria-label={
+                      showConfirmPassword
+                        ? 'Hide confirm password'
+                        : 'Show confirm password'
+                    }
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className='size-4' />
+                    ) : (
+                      <Eye className='size-4' />
+                    )}
+                  </button>
                 </div>
                 {errors.confirmPassword && (
                   <p className='text-xs font-bold text-red-500'>
