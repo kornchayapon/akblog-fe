@@ -10,7 +10,6 @@ import { queryClient } from '@/lib/react-query/query-client';
 import { useMutation } from '@tanstack/react-query';
 import { updateUserProfile } from '@/lib/apis/users';
 
-
 import { USER_PROFILE_KEY } from '@/lib/constants/query-key';
 import { resetPasswordRequest } from '@/lib/apis/auth';
 import { uploadPictures } from '@/lib/apis/pictures';
@@ -34,6 +33,7 @@ import {
 import { User, Mail, Loader2, ImageIcon, KeyRound, Send } from 'lucide-react';
 
 import { useUser } from '../../auth/hooks/use-user';
+import { useAuth } from '../../auth/hooks/use-auth';
 
 export type AvatarState = {
   id: number | null;
@@ -69,6 +69,8 @@ function ProfileEditSkeleton() {
 
 export default function UserProfileEditView() {
   const { user, isLoading: isUserLoading } = useUser();
+  const { actions } = useAuth();
+
   const [avatar, setAvatar] = useState<AvatarState>({
     id: null,
     path: null,
@@ -165,6 +167,7 @@ export default function UserProfileEditView() {
   const resetPasswordMutation = useMutation({
     mutationFn: (email: string) => resetPasswordRequest({ email }),
     onSuccess: () => {
+      actions.signOut();
       toast.success(
         'If an account exists for this email, a reset link has been sent. Check your inbox.',
       );
@@ -269,10 +272,10 @@ export default function UserProfileEditView() {
               {avatar.id != null && avatar.path && !avatar.file ? (
                 <>
                   <div className='flex flex-col items-center w-full min-w-0'>
-                    <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'>                      
+                    <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'>
                       <ImageView
                         imageId={avatar.id}
-                        imagePath={avatar.path}                        
+                        imagePath={avatar.path}
                         clearUpload={() =>
                           setAvatar({ id: null, path: null, file: null })
                         }
