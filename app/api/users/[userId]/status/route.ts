@@ -8,8 +8,6 @@ import { apiServer } from '@/lib/axios/axios';
 
 // update user status
 export const PATCH = async (req: Request) => {
-  console.log('update user status ******');
-
   if (await isStaffFromCookies()) {
     return staffForbiddenResponse();
   }
@@ -25,26 +23,6 @@ export const PATCH = async (req: Request) => {
 
   try {
     const body = await req.json();
-
-    console.log('[update user status]:', body);
-
-    // const validatedData = UpdateUserSchema.safeParse(body);
-
-    // if (!validatedData.success) {
-    //   console.log(
-    //     '[proxy: users]: validatedData: ',
-    //     validatedData.error.issues,
-    //   );
-
-    //   return NextResponse.json(
-    //     { message: 'Data invalid!', errors: validatedData.error.issues },
-    //     { status: 400 },
-    //   );
-    // }
-
-    // const userObj = RemoveNullFields(body, 'userId');
-
-    // console.log('[user patch]: ', body, userObj);
 
     const res = await apiServer.patch(
       `/users/${body.userId}/status`,

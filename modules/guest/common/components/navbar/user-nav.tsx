@@ -18,8 +18,7 @@ import {
   LayoutDashboard,
   LogOut,
   Mail,
-  Settings,
-  UserIcon,
+  Settings,  
 } from 'lucide-react';
 
 import { UserRole } from '@/lib/enums/user-role.enum';
@@ -71,8 +70,7 @@ const avatarSizeMap: Record<
 };
 const UserAvatar = ({ user, size = 'small' }: UserAvatarProps) => {
   const avatarSrc: string = getUserAvatarSrc(user);
-  const sizeConfig = avatarSizeMap[size];
-  // const imageClassName = avatarImageClassNameMap[size];
+  const sizeConfig = avatarSizeMap[size];  
 
   if (avatarSrc) {
     return (

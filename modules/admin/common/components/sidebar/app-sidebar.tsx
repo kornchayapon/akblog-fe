@@ -43,7 +43,7 @@ const AppSidebar = ({ user, ...props }: AppSidebarProps) => {
       <SidebarContent>
         <NavMain items={navItems} />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter>        
         <NavUser user={user} />        
       </SidebarFooter>
     </Sidebar>
