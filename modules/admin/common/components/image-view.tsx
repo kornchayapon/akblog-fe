@@ -38,15 +38,15 @@ const ImageView = ({
   };
 
   return (
-    <div className='relative mt-4 group w-full lg:w-[300px]'>
-      <div className='overflow-hidden rounded-md border aspect-video bg-gray-100 relative flex items-center justify-center'>
+    <div className='relative group w-full'>      
+      <div className='relative inline-block'>
         <Image
           src={imagePath}
           alt='Uploaded content'
           className='object-cover'
-          fill
-          sizes='(max-width: 1024px) 100vw, 300px'
-          loading="eager"
+          loading='eager'
+          width={200}
+          height={200}
         />
       </div>
 

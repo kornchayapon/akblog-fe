@@ -10,6 +10,9 @@ import { queryClient } from '@/lib/react-query/query-client';
 import { useMutation } from '@tanstack/react-query';
 import { updateUserProfile } from '@/lib/apis/users';
 
+
+import { USER_PROFILE_KEY } from '@/lib/constants/query-key';
+import { resetPasswordRequest } from '@/lib/apis/auth';
 import { uploadPictures } from '@/lib/apis/pictures';
 import { Picture } from '@/lib/interfaces/picture';
 
@@ -31,8 +34,6 @@ import {
 import { User, Mail, Loader2, ImageIcon, KeyRound, Send } from 'lucide-react';
 
 import { useUser } from '../../auth/hooks/use-user';
-
-import { USER_PROFILE_KEY } from '@/lib/constants/query-key';
 
 export type AvatarState = {
   id: number | null;
@@ -161,6 +162,18 @@ export default function UserProfileEditView() {
     },
   });
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: (email: string) => resetPasswordRequest({ email }),
+    onSuccess: () => {
+      toast.success(
+        'If an account exists for this email, a reset link has been sent. Check your inbox.',
+      );
+    },
+    onError: (err: Error) => {
+      toast.error(err?.message ?? 'Could not send reset link.');
+    },
+  });
+
   const submitProfile = (avatarId: number | null) => {
     const values = getValues();
     updateProfileMutation.mutate({
@@ -256,10 +269,10 @@ export default function UserProfileEditView() {
               {avatar.id != null && avatar.path && !avatar.file ? (
                 <>
                   <div className='flex flex-col items-center w-full min-w-0'>
-                    <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'>
+                    <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'>                      
                       <ImageView
                         imageId={avatar.id}
-                        imagePath={avatar.path}
+                        imagePath={avatar.path}                        
                         clearUpload={() =>
                           setAvatar({ id: null, path: null, file: null })
                         }
@@ -398,6 +411,33 @@ export default function UserProfileEditView() {
                     Email is used as the login account and cannot be changed
                     here.
                   </p>
+                </div>
+
+                {/* Reset password */}
+                <div className='pt-4 border-t border-slate-200 dark:border-slate-800'>
+                  <div className='flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium mb-1'>
+                    <KeyRound className='size-4 text-amber-500' />
+                    Password
+                  </div>
+                  <p className='text-sm text-slate-500 dark:text-slate-400 mb-3'>
+                    Want to change your password? We will send a reset password
+                    link to your email.
+                  </p>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    disabled={resetPasswordMutation.isPending || isSaving}
+                    className='rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:border-amber-200 dark:hover:border-amber-800 hover:text-amber-700 dark:hover:text-amber-400 gap-2'
+                    onClick={() => resetPasswordMutation.mutate(user.email)}
+                  >
+                    {resetPasswordMutation.isPending ? (
+                      <Loader2 className='w-4 h-4 animate-spin' />
+                    ) : (
+                      <Send className='w-4 h-4' />
+                    )}
+                    Send Reset Password Link
+                  </Button>
                 </div>
               </div>
 
