@@ -54,7 +54,7 @@ export const useAuth = () => {
       // apiClient.post('/auth/signup', { name: 'hello '}).then((res) => res.data),
       apiClient.post('/auth/signup', payload).then((res) => res.data),
     onSuccess: (data: AuthResponse) => {
-      handleAuthSuccess(data, 'Hi, Welcome!');    
+      handleAuthSuccess(data, 'Hi, Welcome!');
     },
     onError: (error: unknown) => {
       if (checkAxiosError(error)) {
@@ -111,16 +111,74 @@ export const useAuth = () => {
     },
   });
 
+  const verifyEmailMutation = useMutation({
+    mutationFn: async ({ userId, code }: { userId: number; code: string }) => {
+      const res = await apiClient.post('/auth/verify', { userId, code });
+      return res.data;
+    },
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['user-profile'], updatedUser);
+      toast.success('Email verification succeeded');
+    },
+    onError: (error: unknown) => {
+      if (checkAxiosError(error)) {
+        const status = error.response.status;
+        // Wrong/expired OTP (or validation) — stay on the page; otp-input shows inline error.
+        if (status === 400 || status === 422) {
+          return;
+        }
+        toast.error(
+          error.response.data.message ??
+            'Email verification failed. Please try again.',
+        );
+      } else {
+        toast.error('Email verification failed. Please try again.');
+      }
+      clearAuth();
+      queryClient.clear();
+      router.push('/');
+    },
+  });
+
+  const resendOTPMutation = useMutation({
+    mutationFn: async ({ userId }: { userId: number }) => {
+      await apiClient.post('/auth/otp', { userId });
+    },
+    onSuccess: () => {
+      toast.success('OTP sent successfully. Please check your email.');
+    },
+    onError: (error: unknown) => {
+      if (checkAxiosError(error)) {
+        const status = error.response.status;
+        if (status !== 400 && status !== 429) {
+          console.error('Resend OTP failed on server', error);
+        }
+        toast.error(
+          error.response.data.message ?? 'Could not resend verification code.',
+        );
+      } else {
+        console.error('Resend OTP failed on server', error);
+        toast.error('Could not resend verification code.');
+      }
+      // Keep user on OTP view for recoverable resend failures (e.g., 400).
+      // Auth/session cleanup is handled by axios interceptor on 401.
+    },
+  });
+
   return {
     actions: {
       signUp: signUpMutation.mutateAsync,
       signIn: signInMutation.mutateAsync,
       signOut: signOutMutation.mutateAsync,
+      verifyEmail: verifyEmailMutation.mutateAsync,
+      resendOTP: resendOTPMutation.mutateAsync,
     },
     status: {
       isSignUpPending: signUpMutation.isPending,
       isSignInPending: signInMutation.isPending,
       isSignOutPending: signOutMutation.isPending,
-    }
-  }
+      isVerifyEmailPending: verifyEmailMutation.isPending,
+      isResendOTPLoading: resendOTPMutation.isPending,
+    },
+  };
 };
