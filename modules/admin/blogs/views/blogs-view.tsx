@@ -152,24 +152,6 @@ const BlogsView = () => {
     setTitle('Blogs management');
   }, [setTitle]);
 
-  /* const columns = useMemo(
-    () =>
-      BlogColumns(
-        handleUpdate,
-        handleSoftDelete,
-        handleRestore,
-        handlePermanentDelete,
-        handleStatusChange,
-      ),
-    [
-      handleUpdate,
-      handleSoftDelete,
-      handleRestore,
-      handlePermanentDelete,
-      handleStatusChange,
-    ],
-  ); */
-
   const handleCreate = useCallback(() => {
     router.push('/admin/blogs/create');
   }, [router]);
