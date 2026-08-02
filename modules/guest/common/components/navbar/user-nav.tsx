@@ -18,15 +18,13 @@ import {
   LayoutDashboard,
   LogOut,
   Mail,
-  Settings,  
+  Settings,
 } from 'lucide-react';
 
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { User } from '@/lib/interfaces/user';
-import { getUserAvatarSrc } from '@/lib/utils/user-avatar-src';
 
 import { useAuth } from '@/modules/guest/auth/hooks/use-auth';
-
 
 interface UserNavProps {
   user: User | null;
@@ -69,14 +67,14 @@ const avatarSizeMap: Record<
   },
 };
 const UserAvatar = ({ user, size = 'small' }: UserAvatarProps) => {
-  const avatarSrc: string = getUserAvatarSrc(user);
-  const sizeConfig = avatarSizeMap[size];  
+  const sizeConfig = avatarSizeMap[size];
+  
+  const avatarSrc = user.socialAcc ? user.socialAvatarUrl : user.avatar?.path;
 
   if (avatarSrc) {
     return (
       <Image
         src={avatarSrc}
-        about=''
         alt={user.firstName ?? 'User avatar'}
         width={sizeConfig.image.width}
         height={sizeConfig.image.height}

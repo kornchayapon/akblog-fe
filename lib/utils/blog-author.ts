@@ -1,12 +1,7 @@
 import type { BlogAuthor } from '@/lib/interfaces/blog';
-import { getUserAvatarSrc } from '@/lib/utils/user-avatar-src';
 
 export function getBlogAuthorDisplayName(author: BlogAuthor): string {
   return [author.firstName, author.lastName].filter(Boolean).join(' ').trim();
-}
-
-export function getBlogAuthorAvatarSrc(author: BlogAuthor): string {
-  return getUserAvatarSrc(author);
 }
 
 export function getBlogAuthorInitials(author: BlogAuthor): string {

@@ -22,8 +22,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-import ImageView from '@/modules/admin/common/components/image-view';
 import UploadThumbnail from '@/modules/admin/common/components/upload-thumbnail';
+import ImageView from '@/modules/admin/common/components/image-view';
 
 import {
   memberProfileFormSchema,
@@ -36,9 +36,9 @@ import { useUser } from '../../auth/hooks/use-user';
 import { useAuth } from '../../auth/hooks/use-auth';
 
 export type AvatarState = {
-  id: number | null;
-  path: string | null;
-  file: File | null;
+  id?: number | null;
+  path?: string | null;
+  file?: File | null;
 };
 
 function ProfileEditSkeleton() {
@@ -230,6 +230,8 @@ export default function UserProfileEditView() {
   const isMutating = updateProfileMutation.isPending;
   const isSaving = isUploading || isMutating;
 
+  console.log('avatar', avatar);
+
   return (
     <div className='min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 lg:pt-24 pb-16'>
       <div className='container mx-auto px-4 lg:px-6'>
@@ -255,83 +257,85 @@ export default function UserProfileEditView() {
         </div>
 
         <div
-          className={`grid gap-8 lg:grid-cols-[minmax(0,280px)_1fr] mt-10 ${isSaving ? 'pointer-events-none opacity-70' : ''}`}
+          className={`grid gap-8 ${user.socialAcc? 'lg:grid-cols-1' : 'lg:grid-cols-[minmax(0,280px)_1fr]'} mt-10 ${isSaving ? 'pointer-events-none opacity-70' : ''}`}
         >
           {/* Left: Avatar */}
-          <div className='rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>
-            <div className='bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-100 dark:border-slate-800'>
-              <div className='flex items-center gap-2 text-slate-600 dark:text-slate-300'>
-                <ImageIcon className='size-5 text-amber-500' />
-                <span className='font-semibold'>Profile Picture</span>
+          {!user.socialAcc && (
+            <div className='rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>
+              <div className='bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-100 dark:border-slate-800'>
+                <div className='flex items-center gap-2 text-slate-600 dark:text-slate-300'>
+                  <ImageIcon className='size-5 text-amber-500' />
+                  <span className='font-semibold'>Profile Picture</span>
+                </div>
+                <p className='text-xs text-slate-500 dark:text-slate-400 mt-0.5'>
+                  This picture will be shown in the system
+                </p>
               </div>
-              <p className='text-xs text-slate-500 dark:text-slate-400 mt-0.5'>
-                This picture will be shown in the system
-              </p>
-            </div>
-            <div className='p-6'>
-              {avatar.id != null && avatar.path && !avatar.file ? (
-                <>
-                  <div className='flex flex-col items-center w-full min-w-0'>
-                    <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'>
-                      <ImageView
-                        imageId={avatar.id}
-                        imagePath={avatar.path}
-                        clearUpload={() =>
-                          setAvatar({ id: null, path: null, file: null })
+              <div className='p-6'>
+                {avatar.id != null && avatar.path && !avatar.file ? (
+                  <>
+                    <div className='flex flex-col items-center w-full min-w-0'>
+                      <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'>
+                        <ImageView
+                          imageId={avatar.id}
+                          imagePath={avatar.path}
+                          clearUpload={() =>
+                            setAvatar({ id: null, path: null, file: null })
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className='mt-4'>
+                      <UploadThumbnail
+                        key={uploadKey}
+                        uploadMutation={uploadAvatarMutation}
+                        setSelectedFile={(file) =>
+                          setAvatar((prev) => ({ ...prev, file }))
                         }
+                        label='Upload Profile Picture'
                       />
                     </div>
-                  </div>
-                  <div className='mt-4'>
-                    <UploadThumbnail
-                      key={uploadKey}
-                      uploadMutation={uploadAvatarMutation}
-                      setSelectedFile={(file) =>
-                        setAvatar((prev) => ({ ...prev, file }))
-                      }
-                      label='Upload Profile Picture'
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className='flex flex-col items-center w-full min-w-0'>
-                    <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 bg-slate-100 dark:bg-slate-800'>
-                      {filePreviewUrl ? (
-                        <Image
-                          src={filePreviewUrl}
-                          alt='Selected picture'
-                          className='object-cover'
-                          fill
-                          sizes='200px'
-                          priority
-                        />
-                      ) : (
-                        <Image
-                          priority
-                          src='/images/user.png'
-                          alt='Profile Picture'
-                          className='object-cover'
-                          fill
-                          sizes='200px'
-                        />
-                      )}
+                  </>
+                ) : (
+                  <>
+                    <div className='flex flex-col items-center w-full min-w-0'>
+                      <div className='relative w-full max-w-[200px] aspect-square overflow-hidden rounded-2xl ring-2 ring-slate-200 dark:ring-slate-700 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 bg-slate-100 dark:bg-slate-800'>
+                        {filePreviewUrl ? (
+                          <Image
+                            src={filePreviewUrl}
+                            alt='Selected picture'
+                            className='object-cover'
+                            fill
+                            sizes='200px'
+                            priority
+                          />
+                        ) : (
+                          <Image
+                            priority
+                            src='/images/user.png'
+                            alt='Profile Picture'
+                            className='object-cover'
+                            fill
+                            sizes='200px'
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className='mt-4'>
-                    <UploadThumbnail
-                      key={uploadKey}
-                      uploadMutation={uploadAvatarMutation}
-                      setSelectedFile={(file) =>
-                        setAvatar((prev) => ({ ...prev, file }))
-                      }
-                      label='Upload Profile Picture'
-                    />
-                  </div>
-                </>
-              )}
+                    <div className='mt-4'>
+                      <UploadThumbnail
+                        key={uploadKey}
+                        uploadMutation={uploadAvatarMutation}
+                        setSelectedFile={(file) =>
+                          setAvatar((prev) => ({ ...prev, file }))
+                        }
+                        label='Upload Profile Picture'
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Right: Form */}
           <div className='rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>

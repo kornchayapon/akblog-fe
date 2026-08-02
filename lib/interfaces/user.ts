@@ -16,4 +16,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
+
+  socialAcc: boolean;
+  socialAvatarUrl: string | null;
 }

@@ -7,7 +7,6 @@ import type { BlogAuthor } from '@/lib/interfaces/blog';
 import { cn } from '@/lib/utils';
 import {
   getBlogAuthorAvatarColorClass,
-  getBlogAuthorAvatarSrc,
   getBlogAuthorDisplayName,
   getBlogAuthorInitials,
 } from '@/lib/utils/blog-author';
@@ -39,15 +38,19 @@ export function BlogAuthorAvatar({
   size = 'md',
   className,
 }: BlogAuthorAvatarProps): ReactElement {
-  const src = getBlogAuthorAvatarSrc(author);
-  const displayName = getBlogAuthorDisplayName(author) || author.firstName || 'Author';
+  const src = author.avatar?.path;
+  const displayName =
+    getBlogAuthorDisplayName(author) || author.firstName || 'Author';
   const initials = getBlogAuthorInitials(author);
   const colorClass = getBlogAuthorAvatarColorClass(author.id);
 
   return (
     <Avatar className={cn(SIZE_CLASS[size], className)}>
       {src ? (
-        <AvatarImage src={src} alt={displayName ? `${displayName} avatar` : 'Author avatar'} />
+        <AvatarImage
+          src={src}
+          alt={displayName ? `${displayName} avatar` : 'Author avatar'}
+        />
       ) : null}
       <AvatarFallback className={cn(FALLBACK_TEXT_CLASS[size], colorClass)}>
         {initials}

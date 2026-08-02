@@ -48,8 +48,7 @@ const ImageView = ({
           width={200}
           height={200}
         />
-      </div>
-
+      </div>      
       <Button
         variant='destructive'
         size='icon'

@@ -1,3 +1,5 @@
+import { useRouter } from 'next/navigation';
+
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/react-query/query-client';
 
@@ -9,7 +11,7 @@ import apiClient from '@/lib/axios/axios';
 import { User } from '@/lib/interfaces/user';
 import { USER_PROFILE_KEY } from '@/lib/constants/query-key';
 import { checkAxiosError } from '@/lib/functions/check-axios-error';
-import { useRouter } from 'next/navigation';
+import { githubSignin, googleSignin } from '@/lib/apis/auth';
 
 type SignUpPayload = {
   firstName: string;
@@ -25,6 +27,16 @@ type SignInPayload = {
 interface AuthResponse {
   access_token: string;
   user: User;
+}
+
+export interface GoogleSigninPayload {
+  code: string;
+  redirectUri: string;
+}
+
+export interface GithubSigninPayload {
+  code: string;
+  redirectUri: string;
 }
 
 export const useAuth = () => {
@@ -165,6 +177,50 @@ export const useAuth = () => {
     },
   });
 
+  const googleSigninMutation = useMutation({
+    mutationFn: (payload: GoogleSigninPayload) => googleSignin(payload),
+    onSuccess: (data: AuthResponse) => {
+      handleAuthSuccess(
+        { access_token: data.access_token },
+        'Google sign in successful',
+        { refetchProfile: false },
+      );
+      queryClient.setQueryData([USER_PROFILE_KEY], data.user);
+    },
+    onError: (error: unknown) => {
+      console.error(
+        'Google signin failed on server, clearing local session anyway.',
+        error,
+      );
+      clearAuth();
+      queryClient.clear();
+      toast.success('Google sign in error, Clear Auth!');
+      router.push('/');
+    },
+  });
+
+  const githubSigninMutation = useMutation({
+    mutationFn: (payload: GithubSigninPayload) => githubSignin(payload),
+    onSuccess: (data: AuthResponse) => {
+      handleAuthSuccess(
+        { access_token: data.access_token },
+        'GitHub sign in successful',
+        { refetchProfile: false },
+      );
+      queryClient.setQueryData([USER_PROFILE_KEY], data.user);
+    },
+    onError: (error: unknown) => {
+      console.error(
+        'Github signin failed on server, clearing local session anyway.',
+        error,
+      );
+      clearAuth();
+      queryClient.clear();
+      toast.success('Github sign in error, Clear Auth!');
+      router.push('/');
+    },
+  });
+
   return {
     actions: {
       signUp: signUpMutation.mutateAsync,
@@ -172,6 +228,8 @@ export const useAuth = () => {
       signOut: signOutMutation.mutateAsync,
       verifyEmail: verifyEmailMutation.mutateAsync,
       resendOTP: resendOTPMutation.mutateAsync,
+      googleSignin: googleSigninMutation.mutateAsync,
+      githubSignin: githubSigninMutation.mutateAsync,
     },
     status: {
       isSignUpPending: signUpMutation.isPending,
@@ -179,6 +237,8 @@ export const useAuth = () => {
       isSignOutPending: signOutMutation.isPending,
       isVerifyEmailPending: verifyEmailMutation.isPending,
       isResendOTPLoading: resendOTPMutation.isPending,
+      isGoogleSigninPending: googleSigninMutation.isPending,
+      isGithubSigninPending: githubSigninMutation.isPending,
     },
   };
 };
