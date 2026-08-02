@@ -2,9 +2,7 @@ import apiClient from '../axios/axios';
 
 import { handleApiError } from '../functions/handle-api-error';
 
-export const fetchMe = async () => {
-  console.log('fetchMe work ...');
-  
+export const fetchMe = async () => {  
   try {
     const { data } = await apiClient.get('/auth/me');
 

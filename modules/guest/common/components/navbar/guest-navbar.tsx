@@ -98,6 +98,9 @@ const GuestNavbar = ({ user }: NavbarProps) => {
     };
   }, []);
 
+  console.log('user', user);
+  
+
   return (
     <motion.header
       className={`fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/85 backdrop-blur-xl transition-all ${

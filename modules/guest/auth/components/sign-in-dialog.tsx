@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +26,7 @@ import { useAuthDialogStore } from '../stores/auth-dialog-store';
 import FormFieldError from '../../common/components/form-field-error';
 import FormErrorMessage from '../../common/components/form-error-message';
 import { checkAxiosError } from '@/lib/functions/check-axios-error';
-import Link from 'next/link';
+import SocialSignin from './social-signin';
 
 interface SignInDialogProps {
   open: boolean;
@@ -146,6 +147,8 @@ const SignInDialog = ({ open, onOpenChange }: SignInDialogProps) => {
               Sign In
             </Button>
           </form>
+
+          <SocialSignin isAuthPending={status.isSignInPending} />
 
           {/* Forgot password */}
           <div className='flex justify-end mr-1'>

@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/sidebar';
 
 import { User } from '@/lib/interfaces/user';
-import { getUserAvatarSrc } from '@/lib/utils/user-avatar-src';
 
 import { useAuth } from '@/modules/guest/auth/hooks/use-auth';
 
@@ -111,7 +110,7 @@ export const NavUser = ({ user }: NavUserProps) => {
             <DropdownMenuLabel className='p-0 font-normal'>
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                 <Avatar className='h-8 w-8 rounded-full'>
-                  <AvatarImage src={getUserAvatarSrc(user)} alt={fullName} />
+                  <AvatarImage src={user.avatar?.path} alt={fullName} />
                   <AvatarFallback className='rounded-full'>
                     {fallbackText}
                   </AvatarFallback>
