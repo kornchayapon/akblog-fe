@@ -179,3 +179,59 @@ export const fetchBlogsByTag = async ({
 
   throw new Error('Fetch blogs by tag error');
 };
+
+export type GuestBlogSearchSortOrder = 'ASC' | 'DESC';
+
+export type FetchGuestBlogsSearchParams = Readonly<{
+  search: string;
+  page: number;
+  limit: number;
+  status?: PublishStatusEnum | null;
+  sortBy?: string;
+  orderBy?: GuestBlogSearchSortOrder;
+}>;
+
+/** Keyword search via Nest GET /blogs (proxied when `search` is set). */
+export const fetchGuestBlogsSearch = async ({
+  search,
+  page,
+  limit,
+  status = PublishStatusEnum.PUBLISHED,
+  sortBy = 'updatedAt',
+  orderBy = 'DESC',
+}: FetchGuestBlogsSearchParams): Promise<GuestBlogsResponse> => {
+  const trimmed = search.trim();
+  if (!trimmed) {
+    throw new Error('Search query cannot be empty');
+  }
+
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      search: trimmed,
+      sortBy,
+      orderBy,
+    });
+
+    if (status) params.set('status', status);
+
+    const res = await apiClient.get(`/guest/blogs?${params.toString()}`, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
+
+    if (res.status < 200 || res.status >= 300) {
+      const message =
+        (res.data as { message?: string } | undefined)?.message ??
+        'Search blogs error!';
+      throw new Error(message);
+    }
+
+    return res.data as GuestBlogsResponse;
+  } catch (error: unknown) {
+    handleApiError(error, 'Search blogs error!');
+  }
+
+  throw new Error('Search blogs error!');
+};

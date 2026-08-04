@@ -8,8 +8,40 @@ export const GET = async (req: Request) => {
   const limit = searchParams.get('limit') || '1000';
   const withDeleted = searchParams.get('withDeleted') || 'false';
   const status = searchParams.get('status') || undefined;
+  const searchRaw = searchParams.get('search');
+  const search = searchRaw?.trim() ?? '';
+  const sortBy = searchParams.get('sortBy') || undefined;
+  const orderBy = searchParams.get('orderBy') || undefined;
 
   try {
+    if (search.length > 0) {
+      const params: Record<string, string> = {
+        page,
+        limit,
+        search,
+      };
+      if (status) params.status = status;
+      if (sortBy) params.sortBy = sortBy;
+      if (orderBy) params.orderBy = orderBy;
+
+      const res = await apiServer.get('/guest', {
+        params,
+        validateStatus: () => true,
+      });
+
+      // Error response?
+      if (res.status < 200 || res.status >= 300) {
+        return NextResponse.json(
+          {
+            message: res.data.detail,
+          },
+          { status: res.status },
+        );
+      }
+
+      return NextResponse.json(res.data, { status: res.status });
+    }
+
     const res = await apiServer.get('/guest', {
       params: {
         page,

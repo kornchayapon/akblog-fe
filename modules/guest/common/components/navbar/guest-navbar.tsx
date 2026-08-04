@@ -139,7 +139,7 @@ const GuestNavbar = ({ user }: NavbarProps) => {
 
         {/* Center: Search & Navigation Link */}
         <div className='hidden lg:flex items-center grow max-w-3xl gap-8'>
-          {/* <SearchNav /> */}
+          <SearchNav />
           <DesktopNav
             items={navItems}
             categories={categories}
