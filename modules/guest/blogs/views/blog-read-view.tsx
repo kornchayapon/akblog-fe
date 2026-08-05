@@ -6,9 +6,7 @@ import Image from 'next/image';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { GUEST_BLOGS_KEY } from '@/lib/constants/query-key';
-import { PublishStatusEnum } from '@/lib/enums/publish-status.enum';
-import { fetchGuestBlogBySlug, fetchGuestBlogs } from '@/lib/apis/guest';
+import { fetchGuestBlogBySlug } from '@/lib/apis/guest';
 import {
   estimateReadingMinutesFromHtml,
   formatBlogPublishedLong,
@@ -32,6 +30,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import BlogAdjacentNav from '../components/blog-adjacent-nav';
+import Comment from '../components/comment';
 
 type BlogReadViewProps = Readonly<{
   slug: string;
@@ -290,6 +289,10 @@ const BlogReadView = ({ slug }: BlogReadViewProps): ReactElement => {
             </>
           )}
         </footer>
+
+        {!isBlogPending && (
+          <Comment blogId={currentBlog.id} />
+        )}
       </div>
     </div>
   );
