@@ -1,7 +1,7 @@
-const DashboardPage = () => {
-  return (
-    <div>DashboardPage</div>
-  )
-}
+import DashboardView from '@/modules/admin/dashboard/views/dashboard-view';
 
-export default DashboardPage
+const DashboardPage = () => {
+  return <DashboardView />;
+};
+
+export default DashboardPage;
