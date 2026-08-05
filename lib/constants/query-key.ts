@@ -6,3 +6,4 @@ export const ADMIN_BLOGS_KEY = 'admin-blogs' as const;
 
 export const GUEST_BLOGS_KEY = 'blogs' as const;
 export const GUEST_BLOG_SEARCH_KEY = 'blog-search' as const;
+export const GUEST_COMMENTS_KEY = 'front-comments' as const;
