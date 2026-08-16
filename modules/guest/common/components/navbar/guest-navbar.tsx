@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import SignUpDialog from '@/modules/guest/auth/components/sign-up-dialog';
 import { useAuthDialogStore } from '@/modules/guest/auth/stores/auth-dialog-store';
 import SignInDialog from '@/modules/guest/auth/components/sign-in-dialog';
+import { NotificationBell } from '@/modules/notifications/components/notification-bell';
 
 import { User } from '@/lib/interfaces/user';
 import { Category } from '@/lib/interfaces/category';
@@ -150,7 +151,8 @@ const GuestNavbar = ({ user }: NavbarProps) => {
         {/* Right: User Actions */}
         <div className='flex items-center gap-2 shrink-0'>
           {user ? (
-            <div className='flex items-center gap-1 sm:gap-2'>              
+            <div className='flex items-center gap-1 sm:gap-2'>
+              <NotificationBell variant='member' />     
               <UserNav user={user} />
             </div>
           ) : (

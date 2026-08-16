@@ -1,9 +1,15 @@
+import Link from "next/link";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
+
 import { useHeader } from "../stores/header";
+
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+
 import { Home } from "lucide-react";
+
+import { NotificationBell } from "@/modules/notifications/components/notification-bell";
 
 const AdminNavbar = () => {
   const title = useHeader((state) => state.title);
@@ -20,7 +26,7 @@ const AdminNavbar = () => {
           {title}
         </h1>
         <div className='ml-auto flex items-center gap-1.5'>
-          {/* <NotificationBell variant='admin' /> */}
+          <NotificationBell variant='admin' />
           <Button
             variant='ghost'
             asChild
