@@ -39,7 +39,6 @@ import {
 } from '@/lib/functions/merge-guest-blog-comments-cache';
 import type { Comment, CommentUser } from '@/lib/interfaces/comment';
 import { queryClient } from '@/lib/react-query/query-client';
-// import { getUserAvatarSrc } from '@/lib/utils/user-avatar-src';
 
 const editContentSchema = z
   .string()

@@ -1,6 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useUser } from '@/modules/guest/auth/hooks/use-user';
 import Footer from '@/modules/guest/common/components/footer';
@@ -14,6 +15,13 @@ interface LayoutProps {
 
 const FrontLayout = ({ children }: Readonly<LayoutProps>) => {
   const { user, isLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && user && !user.verified) {
+      router.push('/otp');
+    }
+  }, [user, isLoading, router]);
 
   if (isLoading) {
     return <Loading />;

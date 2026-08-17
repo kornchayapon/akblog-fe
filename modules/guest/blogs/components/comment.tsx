@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/modules/guest/auth/hooks/use-user';
 import { useAuthDialogStore } from '@/modules/guest/auth/stores/auth-dialog-store';
-import { useInfiniteScroll } from '../../hooks/use-infinite-scroll';
+import { useInfiniteScroll } from '../../common/hooks/use-infinite-scroll';
 
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { createComment, fetchCommentsByBlog } from '@/lib/apis/comments';
@@ -40,6 +40,7 @@ import {
 import { queryClient } from '@/lib/react-query/query-client';
 import type { Comment as CommentModel } from '@/lib/interfaces/comment';
 import type { GuestCommentsResponse } from '@/lib/interfaces/guest-comments';
+import { useBlogCommentsSocket } from '@/modules/guest/blogs/hooks/use-blog-comments-socket';
 
 import CommentItem from './comment-item';
 
@@ -107,7 +108,7 @@ const Comment = ({ blogId }: CommentProps): ReactElement => {
     [blogId],
   );
 
-  // useBlogCommentsSocket(blogId, commentsQueryKey, !!blogId);
+  useBlogCommentsSocket(blogId, commentsQueryKey, !!blogId);
 
   const {
     data: commentsData,

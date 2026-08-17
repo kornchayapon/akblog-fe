@@ -14,7 +14,7 @@ import type { GuestBlogsResponse } from '@/lib/interfaces/guest-blogs';
 import { GUEST_BLOGS_KEY } from '@/lib/constants/query-key';
 import { PublishStatusEnum } from '@/lib/enums/publish-status.enum';
 import { fetchGuestBlogs } from '@/lib/apis/guest';
-import { useInfiniteScroll } from '../../hooks/use-infinite-scroll';
+import { useInfiniteScroll } from '../../common/hooks/use-infinite-scroll';
 
 const pageSize = 4;
 

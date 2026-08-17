@@ -27,7 +27,7 @@ import ErrorCard from '@/modules/admin/common/components/error-card';
 import BlogCard from '../../home/components/blog-card';
 import BlogCardSkeleton from '../../home/components/blog-card-skeleton';
 
-import { useInfiniteScroll } from '../../hooks/use-infinite-scroll';
+import { useInfiniteScroll } from '../../common/hooks/use-infinite-scroll';
 
 export type BlogListType = 'category' | 'tag';
 
