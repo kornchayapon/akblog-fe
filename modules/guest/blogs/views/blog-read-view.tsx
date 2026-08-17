@@ -93,6 +93,19 @@ const BlogReadView = ({ slug }: BlogReadViewProps): ReactElement => {
 
   const { currentBlog, prevBlog, nextBlog } = blogsData;
 
+  if (!currentBlog) {
+    return (
+      <div className='mx-auto max-w-3xl px-4 pb-20 pt-24 text-center sm:px-6 lg:px-8'>
+        <p className='text-lg font-semibold text-foreground'>
+          Article not found
+        </p>
+        <p className='mt-2 text-sm text-muted-foreground'>
+          The article may be removed or unpublished.
+        </p>
+      </div>
+    );
+  }
+
   const authorName = [currentBlog.author.firstName, currentBlog.author.lastName]
     .filter(Boolean)
     .join(' ')

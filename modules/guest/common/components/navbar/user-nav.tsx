@@ -19,12 +19,15 @@ import {
   LogOut,
   Mail,
   Settings,
+  UserIcon,
 } from 'lucide-react';
 
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { User } from '@/lib/interfaces/user';
 
 import { useAuth } from '@/modules/guest/auth/hooks/use-auth';
+
+import { useAuthDialogStore } from '@/modules/guest/auth/stores/auth-dialog-store';
 
 interface UserNavProps {
   user: User | null;
@@ -35,7 +38,58 @@ interface AuthenticatedUserNavProps {
 }
 
 const GuestUserNav = () => {
-  return <div>GuestUserName</div>;
+  const { setSignUpOpen, setSignInOpen } = useAuthDialogStore();
+
+  return (
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant='ghost'
+          className='rounded-full h-10 w-10 p-0 flex items-center justify-center transition-all hover:bg-slate-100'
+        >
+          <div
+            className='h-9 w-9 border border-dashed border-slate-300 transition-color 
+              rounded-full flex items-center justify-center hover:border-slate-400'
+          >
+            <UserIcon className='h-5 w-5' />
+          </div>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align='end'
+        sideOffset={8}
+        className='w-64 p-2 rounded-2xl shadow-xl'
+      >
+        <div className='p-4 text-center'>
+          <div className='mx-auto h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center mb-3'>
+            <UserIcon className='h-6 w-6 text-emerald-500' />
+          </div>
+          <h3 className='font-bold text-slate-900'>
+            Sign in to use the platform
+          </h3>
+          <p className='text-xs test-slate-500 mt-1'>
+            Access your blog, comment and all.
+          </p>
+        </div>
+        <DropdownMenuSeparator className='my-2' />
+        <div className='grid gap-2 p-1'>
+          <Button
+            onClick={() => setSignInOpen(true)}
+            className='w-full bg-slate-950 hover:bg-slate-800 text-white rounded-xl font-bold transition-all h-11'
+          >
+            Sign in
+          </Button>
+          <Button
+            variant='outline'
+            className='w-full bg-slate-200 hover:bg-slate-50 rounded-xl font-bold transition-all h-11'
+            onClick={() => setSignUpOpen(true)}
+          >
+            Sign up
+          </Button>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 };
 
 interface UserAvatarProps {

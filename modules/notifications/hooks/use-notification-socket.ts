@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useNotificationStore } from '../stores/notification-store';
-import { authStore } from '@/modules/front/auth/stores/auth-store';
+import { authStore } from '@/modules/guest/auth/stores/auth-store';
 import type { Notification } from '@/lib/interfaces/notification';
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3002';
