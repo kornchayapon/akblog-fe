@@ -16,7 +16,7 @@ export const GET = async (req: Request) => {
   const search = searchRaw?.trim() ?? '';
   const status = searchParams.get('status') || undefined;
   const sortBy = searchParams.get('sortBy') || undefined;
-  const order = searchParams.get('order') || undefined;
+  const orderBy = searchParams.get('orderBy') || undefined;
 
   if (!authHeader) {
     return NextResponse.json(
@@ -33,7 +33,7 @@ export const GET = async (req: Request) => {
   if (search.length > 0) params.search = search;
   if (status) params.status = status;
   if (sortBy) params.sortBy = sortBy;
-  if (order) params.order = order;
+  if (orderBy) params.order = orderBy;
 
   try {
     const res = await apiServer.get('/blogs', {
