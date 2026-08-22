@@ -2,7 +2,7 @@ import apiClient from '../axios/axios';
 
 import { handleApiError } from '../functions/handle-api-error';
 
-export const fetchMe = async () => {  
+export const fetchMe = async () => {
   try {
     const { data } = await apiClient.get('/auth/me');
 
@@ -16,6 +16,8 @@ export type FetchUsersParams = Readonly<{
   page: number;
   limit: number;
   withDeleted?: boolean;
+  /** Keyword search; omit or empty after trim = no filter (backend). */
+  search?: string;
 }>;
 
 // get all user
@@ -23,6 +25,7 @@ export const fetchUsers = async ({
   page,
   limit,
   withDeleted,
+  search,
 }: FetchUsersParams) => {
   try {
     const params = new URLSearchParams({
@@ -30,6 +33,11 @@ export const fetchUsers = async ({
       limit: String(limit),
       withDeleted: String(withDeleted),
     });
+
+    const trimmedSearch = search?.trim() ?? '';
+    if (trimmedSearch.length > 0) {
+      params.set('search', trimmedSearch);
+    }
 
     const res = await apiClient.get(`/users?${params.toString()}`, {
       withCredentials: true,
@@ -75,7 +83,7 @@ export const fetchUser = async ({ userId, signal }: FetchUserParams) => {
   if (!userId) throw new Error('User ID is required');
 
   try {
-    const res = await apiClient.get(`/users/${userId}`, { signal });    
+    const res = await apiClient.get(`/users/${userId}`, { signal });
 
     return res.data;
   } catch (error: unknown) {
@@ -131,10 +139,12 @@ export const updateUserStatus = async ({
   }
 
   console.log('[update user status api]:', `/users/${payload.userId}/status`);
-  
 
   try {
-    const res = await apiClient.patch(`/users/${payload.userId}/status`, payload);
+    const res = await apiClient.patch(
+      `/users/${payload.userId}/status`,
+      payload,
+    );
 
     return res.data;
   } catch (error: unknown) {
@@ -239,7 +249,7 @@ export async function updateUserProfile({
     role: currentRole, // read-only: clients cannot change their own role here
     avatar: payload.avatar ?? undefined,
   };
-  
+
   // Include password only when the user is changing it
   if (payload.password !== undefined && payload.password !== '') {
     body.password = payload.password;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { deletePermanentTag, fetchTags } from '@/lib/apis/tags';
@@ -14,13 +14,16 @@ import { TagColumns } from '../data/tag-columns';
 
 import CreateTagDialog from '../components/create-tag-dialog';
 import UpdateTagDialog from '../components/update-tag-dialog';
+import TagsSearchToolbar from '../components/tags-search-toolbar';
 
 import { toast } from 'sonner';
 import ConfirmDeleteDialog from '../../common/components/confirm-delete-dialog';
 
 import { useHeader } from '../../common/stores/header';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 350;
 
 const TagsView = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState<boolean>(false);
@@ -29,15 +32,22 @@ const TagsView = () => {
     useState<boolean>(false);
 
   const [tagId, setTagId] = useState<number | null>(null);
-  const [pageIndex, setPageIndex] = useState<number>(1);  
+  const [pageIndex, setPageIndex] = useState<number>(1);
+  const [searchInput, setSearchInput] = useState<string>('');
 
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [ADMIN_TAGS_KEY, pageIndex],
+  const effectiveSearch = useDebouncedValue(
+    searchInput.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
+
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: [ADMIN_TAGS_KEY, pageIndex, effectiveSearch],
     queryFn: () =>
       fetchTags({
         page: pageIndex,
         limit: PAGE_SIZE,
-        withDeleted: false,        
+        withDeleted: false,
+        ...(effectiveSearch.length > 0 ? { search: effectiveSearch } : {}),
       }),
     staleTime: 5000,
     placeholderData: (previousData) => previousData,
@@ -90,6 +100,13 @@ const TagsView = () => {
     setOpenConfirmDeleteDialog(true);
   };
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+    setPageIndex(1);
+  }, []);
+
+  const isToolbarSearching = Boolean(data) && isFetching;
+
   let content: React.ReactNode;
 
   if (isPending && !data) {
@@ -137,6 +154,11 @@ const TagsView = () => {
 
   return (
     <div className='min-w-0 max-w-full px-6 pb-3'>
+      <TagsSearchToolbar
+        value={searchInput}
+        onChange={handleSearchChange}
+        isSearching={isToolbarSearching}
+      />
       <div className='font-bold'>{content}</div>
     </div>
   );

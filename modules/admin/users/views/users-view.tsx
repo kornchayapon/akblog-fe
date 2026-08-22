@@ -1,11 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { ADMIN_USER_KEY } from '@/lib/constants/query-key';
-import { deletePermanentUser, fetchUsers, restoreUser, softDeleteUser, updateUserStatus } from '@/lib/apis/users';
+import {
+  deletePermanentUser,
+  fetchUsers,
+  restoreUser,
+  softDeleteUser,
+  updateUserStatus,
+} from '@/lib/apis/users';
 
 import TableSkeleton from '../../common/components/data-table/table-skeleton';
 import ErrorCard from '../../common/components/error-card';
@@ -16,14 +22,17 @@ import { UserColumns } from '../data/user-columns';
 import CreateUserDialog from '../components/create-user-dialog';
 import UpdateUserDialog from '../components/update-user-dialog';
 import ConfirmDeleteDialog from '../../common/components/confirm-delete-dialog';
+import UsersSearchToolbar from '../components/users-search-toolbar';
 
 import { toast } from 'sonner';
 import { useHeader } from '../../common/stores/header';
 
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 350;
 
 const UsersView = () => {
-  const [pageIndex, setPageIndex] = useState<number>(1);
   const [openCreateDialog, setOpenCreateDialog] = useState<boolean>(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState<boolean>(false);
   const [openConfirmSoftDeleteDialog, setOpenConfirmSoftDeleteDialog] =
@@ -34,19 +43,28 @@ const UsersView = () => {
   ] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
 
+  const [pageIndex, setPageIndex] = useState<number>(1);
+  const [searchInput, setSearchInput] = useState<string>('');
+
+  const effectiveSearch = useDebouncedValue(
+    searchInput.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
+
   const setTitle = useHeader((state) => state.setTitle);
 
   useEffect(() => {
     setTitle('User management');
   }, [setTitle]);
 
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [ADMIN_USER_KEY, pageIndex],
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: [ADMIN_USER_KEY, pageIndex, effectiveSearch],
     queryFn: () =>
       fetchUsers({
         page: pageIndex,
         limit: PAGE_SIZE,
         withDeleted: true,
+        ...(effectiveSearch.length > 0 ? { search: effectiveSearch } : {}),
       }),
     staleTime: 5000,
     placeholderData: (previousData) => previousData,
@@ -185,7 +203,13 @@ const UsersView = () => {
     setUserId(id);
     setOpenConfirmPermanentDeleteDialog(true);
   };
-  
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+    setPageIndex(1);
+  }, []);
+
+  const isToolbarSearching = Boolean(data) && isFetching;
 
   let content: React.ReactNode;
 
@@ -237,7 +261,7 @@ const UsersView = () => {
             handleRestore,
             handleDeletePermanent,
             handleToggleActive,
-            isToggleActivePending       
+            isToggleActivePending,
           )}
           createTitle='Create User'
           onCreate={() => setOpenCreateDialog(true)}
@@ -253,6 +277,11 @@ const UsersView = () => {
 
   return (
     <div className='min-w-0 max-w-full px-6 pb-3'>
+      <UsersSearchToolbar
+        value={searchInput}
+        onChange={handleSearchChange}
+        isSearching={isToolbarSearching}
+      />
       <div className='font-bold'>{content}</div>
     </div>
   );

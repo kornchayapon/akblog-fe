@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -26,7 +26,11 @@ import { BlogColumns } from '../data/blog-columns';
 import { toast } from 'sonner';
 import { PublishStatusEnum } from '@/lib/enums/publish-status.enum';
 
+import BlogsSearchToolbar from '../components/blogs-search-toolbar';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 350;
 
 const BlogsView = () => {
   const [openConfirmSoftDeleteDialog, setOpenConfirmSoftDeleteDialog] =
@@ -38,17 +42,24 @@ const BlogsView = () => {
 
   const [blogId, setBlogId] = useState<number | null>(null);
   const [pageIndex, setPageIndex] = useState<number>(1);
+  const [searchInput, setSearchInput] = useState<string>('');
 
   const router = useRouter();
 
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [ADMIN_BLOGS_KEY, pageIndex],
+  const effectiveSearch = useDebouncedValue(
+    searchInput.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
+
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: [ADMIN_BLOGS_KEY, pageIndex, effectiveSearch],
     queryFn: () =>
       fetchBlogs({
         page: pageIndex,
         limit: PAGE_SIZE,
         withDeleted: true,
-        status: PublishStatusEnum.PUBLISHED
+        status: PublishStatusEnum.PUBLISHED,
+        ...(effectiveSearch.length > 0 ? { search: effectiveSearch } : {}),
       }),
     staleTime: 5000,
     placeholderData: (previousData) => previousData,
@@ -199,7 +210,14 @@ const BlogsView = () => {
     [updateStatusMutate],
   );
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+    setPageIndex(1);
+  }, []);
+
   let content: React.ReactNode;
+
+  const isToolbarSearching = Boolean(data) && isFetching;
 
   if (isPending && !data) {
     content = <TableSkeleton />;
@@ -251,6 +269,11 @@ const BlogsView = () => {
 
   return (
     <div className='min-w-0 max-w-full px-6 pb-3'>
+      <BlogsSearchToolbar
+        value={searchInput}
+        onChange={handleSearchChange}
+        isSearching={isToolbarSearching}
+      />
       <div className='font-bold'>{content}</div>
     </div>
   );

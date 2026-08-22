@@ -27,6 +27,8 @@ export const GET = async (req: Request) => {
   const page = searchParams.get('page') || '1';
   const limit = searchParams.get('limit') || '1000';
   const withDeleted = searchParams.get('withDeleted') || 'false';
+  const searchRaw = searchParams.get('search');
+  const search = searchRaw?.trim() ?? '';
 
   if (!authHeader) {
     return NextResponse.json(
@@ -40,6 +42,10 @@ export const GET = async (req: Request) => {
     limit,
     withDeleted,
   };
+
+  if (search.length > 0) {
+    params.search = search;
+  }
 
   try {
     const res = await apiServer.get('/users', {

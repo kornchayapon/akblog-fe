@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { toast } from 'sonner';
@@ -17,10 +17,14 @@ import { DataTable } from '../../common/components/data-table/data-table';
 import TableSkeleton from '../../common/components/data-table/table-skeleton';
 import ErrorCard from '../../common/components/error-card';
 import ConfirmDeleteDialog from '../../common/components/confirm-delete-dialog';
+import CommentsSearchToolbar from '../components/comments-search-toolbar';
 
 import { CommentColumns, type ViewBlogInfo } from '../data/comment-columns';
 
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 350;
 
 const CommentsView = () => {
   const [openConfirmSoftDeleteDialog, setOpenConfirmSoftDeleteDialog] =
@@ -28,14 +32,21 @@ const CommentsView = () => {
   const [commentId, setCommentId] = useState<number | null>(null);
 
   const [pageIndex, setPageIndex] = useState<number>(1);
+  const [searchInput, setSearchInput] = useState<string>('');
 
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [ADMIN_COMMENTS_KEY, pageIndex],
+  const effectiveSearch = useDebouncedValue(
+    searchInput.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
+
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: [ADMIN_COMMENTS_KEY, pageIndex, effectiveSearch],
     queryFn: () =>
       fetchAdminComments({
         page: pageIndex,
         limit: PAGE_SIZE,
         withDeleted: true,
+        ...(effectiveSearch.length > 0 ? { search: effectiveSearch } : {}),
       }),
     staleTime: 5000,
     placeholderData: (previousData) => previousData,
@@ -120,6 +131,13 @@ const CommentsView = () => {
     }
   }, [isError, error]);
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+    setPageIndex(1);
+  }, []);
+
+  const isToolbarSearching = Boolean(data) && isFetching;
+
   let content: React.ReactNode;
 
   if (isPending && !data) {
@@ -159,6 +177,11 @@ const CommentsView = () => {
 
   return (
     <div className='min-w-0 max-w-full px-6 pb-3'>
+      <CommentsSearchToolbar
+        value={searchInput}
+        onChange={handleSearchChange}
+        isSearching={isToolbarSearching}
+      />
       <div className='font-bold'>{content}</div>
       {(isRestorePending || isSoftDeletePending) && (
         <span className='sr-only'>Updating comment…</span>

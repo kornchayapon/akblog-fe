@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -18,9 +18,14 @@ import CreateCategoryDialog from '../components/create-category-dialog';
 import UpdateCategoryDialog from '../components/update-category-dialog';
 import ConfirmDeleteDialog from '../../common/components/confirm-delete-dialog';
 
+import CategoriesSearchToolbar from '../components/categories-search-toolbar';
+
 import { toast } from 'sonner';
 
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 350;
 
 const CategoriesView = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState<boolean>(false);
@@ -30,14 +35,21 @@ const CategoriesView = () => {
 
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [pageIndex, setPageIndex] = useState<number>(1);
+  const [searchInput, setSearchInput] = useState<string>('');
 
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [ADMIN_CATEGORIES_KEY, pageIndex],
+  const effectiveSearch = useDebouncedValue(
+    searchInput.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
+
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: [ADMIN_CATEGORIES_KEY, pageIndex, effectiveSearch],
     queryFn: () =>
       fetchCategories({
         page: pageIndex,
         limit: PAGE_SIZE,
         withDeleted: true,
+        ...(effectiveSearch.length > 0 ? { search: effectiveSearch } : {}),
       }),
     staleTime: 5000,
     placeholderData: (previousData) => previousData,
@@ -90,7 +102,14 @@ const CategoriesView = () => {
     }
   };
 
+  const handleSearchChange = useCallback((value: string) => {
+      setSearchInput(value);
+      setPageIndex(1);
+    }, []);
+
   let content: React.ReactNode;
+
+  const isToolbarSearching = Boolean(data) && isFetching;
 
   if (isPending && !data) {
     content = <TableSkeleton />;
@@ -140,6 +159,11 @@ const CategoriesView = () => {
 
   return (
     <div className='min-w-0 max-w-full px-6 pb-3'>
+      <CategoriesSearchToolbar
+        value={searchInput}
+        onChange={handleSearchChange}
+        isSearching={isToolbarSearching}
+      />
       <div className='font-bold'>{content}</div>
     </div>
   );
