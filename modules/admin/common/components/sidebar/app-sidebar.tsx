@@ -16,12 +16,21 @@ import NavMain from './nav-main';
 
 import { navItems } from './data/nav-items';
 import { NavUser } from './data/nav-user';
+import { UserRole } from '@/lib/enums/user-role.enum';
+import { STAFF_RESTRICTED_ADMIN_PATHS } from '@/lib/constants/staff-restricted-admin';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: User | null;
 }
 
+const restrictedUrls = new Set<string>(STAFF_RESTRICTED_ADMIN_PATHS);
+
 const AppSidebar = ({ user, ...props }: AppSidebarProps) => {
+  const mainNavItems =
+    user?.role === UserRole.STAFF
+      ? navItems.filter((item) => !restrictedUrls.has(item.url))
+      : navItems;
+
   return (
     <Sidebar collapsible='offcanvas' {...props}>
       <SidebarHeader>
@@ -41,10 +50,10 @@ const AppSidebar = ({ user, ...props }: AppSidebarProps) => {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navItems} />
+        <NavMain items={mainNavItems} />
       </SidebarContent>
-      <SidebarFooter>        
-        <NavUser user={user} />        
+      <SidebarFooter>
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

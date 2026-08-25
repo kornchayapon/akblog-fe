@@ -4,7 +4,7 @@ import {
   isStaffFromCookies,
   staffForbiddenResponse,
 } from '@/lib/auth/staff-cookie';
-import { checkAxiosError } from '@/lib/functions/check-axios-error';
+
 import { apiServer } from '@/lib/axios/axios';
 
 interface IParams {
