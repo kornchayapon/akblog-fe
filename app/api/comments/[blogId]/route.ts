@@ -36,7 +36,7 @@ export const GET = async (req: Request, { params }: RouteParams) => {
           }
         : undefined,
       validateStatus: () => true,
-    });
+    });    
 
     // Error response?
     if (res.status < 200 || res.status >= 300) {

@@ -34,9 +34,12 @@ export const fetchCommentsByBlog = async ({
       params.set('withDeleted', String(withDeleted));
     }
 
-    const res = await apiClient.get(`/comments/${blogId}?${params.toString()}`, {
-      validateStatus: () => true,
-    });
+    const res = await apiClient.get(
+      `/comments/${blogId}?${params.toString()}`,
+      {
+        validateStatus: () => true,
+      },
+    );
 
     console.log('[FETCH COMMENT]: ', res.data);
 
@@ -99,7 +102,6 @@ export const createComment = async ({
   }
 };
 
-
 export type UpdateCommentPayload = {
   content: string;
   blog: number;
@@ -113,14 +115,10 @@ export const updateComment = async ({
   payload: UpdateCommentPayload;
 }): Promise<Comment> => {
   try {
-    const res = await apiClient.patch(
-      `/comments/item/${commentId}`,
-      payload,
-      {
-        withCredentials: true,
-        validateStatus: () => true,
-      },
-    );
+    const res = await apiClient.patch(`/comments/item/${commentId}`, payload, {
+      withCredentials: true,
+      validateStatus: () => true,
+    });
 
     if (res.status < 200 || res.status >= 300) {
       const message =

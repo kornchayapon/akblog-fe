@@ -120,7 +120,7 @@ const avatarSizeMap: Record<
       'h-12 w-12 rounded-full bg-linear-to-br from-emerald-300 to-emerald-500 flex items-center justify-center text-white font-bold text-lg',
   },
 };
-const UserAvatar = ({ user, size = 'small' }: UserAvatarProps) => {
+export const UserAvatar = ({ user, size = 'small' }: UserAvatarProps) => {
   const sizeConfig = avatarSizeMap[size];
   
   const avatarSrc = user.socialAcc ? user.socialAvatarUrl : user.avatar?.path;

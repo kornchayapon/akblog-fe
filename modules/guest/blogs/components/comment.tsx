@@ -246,7 +246,7 @@ const Comment = ({ blogId }: CommentProps): ReactElement => {
     }));
 
     return { groupedComments, commentsById: byId };
-  }, [allComments]);  
+  }, [allComments]);
 
   const canManageComment = (c: CommentModel): boolean => {
     console.log('CommentModel', c);
