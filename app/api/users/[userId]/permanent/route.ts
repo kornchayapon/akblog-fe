@@ -3,7 +3,7 @@ import {
   staffForbiddenResponse,
 } from '@/lib/auth/staff-cookie';
 import { apiServer } from '@/lib/axios/axios';
-import { checkAxiosError } from '@/lib/functions/check-axios-error';
+
 import { NextResponse } from 'next/server';
 
 // permanent delete user
