@@ -94,6 +94,9 @@ const CommentItem = ({
   const avatarColor = getAvatarColor(user.id);
   const avatarSrc = user.socialAcc ? user.socialAvatarUrl : user.avatar?.path;
 
+  console.log('*avatarSrc:', avatarSrc, user);
+  
+
   const replyFullName = replyToUser
     ? [replyToUser.firstName, replyToUser.lastName].filter(Boolean).join(' ')
     : null;

@@ -1,6 +1,10 @@
 import type { InfiniteData, QueryClient } from '@tanstack/react-query';
 
-import type { Comment, CommentParentRef, CommentUser } from '@/lib/interfaces/comment';
+import type {
+  Comment,
+  CommentParentRef,
+  CommentUser,
+} from '@/lib/interfaces/comment';
 import type { Picture } from '@/lib/interfaces/picture';
 import type { GuestCommentsResponse } from '@/lib/interfaces/guest-comments';
 import type { GuestBlogCommentsQueryKey } from '@/lib/constants/guest-blog-comments-query';
@@ -70,7 +74,9 @@ function pickCommentUserPicture(
   fromPictureKey: Picture | null | undefined,
 ): Picture | null | undefined {
   const usePrimary =
-    fromAvatarKey !== undefined && fromAvatarKey !== null ? fromAvatarKey : null;
+    fromAvatarKey !== undefined && fromAvatarKey !== null
+      ? fromAvatarKey
+      : null;
   if (usePrimary) return usePrimary;
 
   const useSecondary =
@@ -98,8 +104,16 @@ function parseCommentUser(value: unknown): CommentUser | null {
   const parsedAvatarSlot = parseCommentPicture(value.avatar);
   const parsedPictureSlot = parseCommentPicture(value.picture);
   const avatar = pickCommentUserPicture(parsedAvatarSlot, parsedPictureSlot);
+  const socialAcc = value.socialAcc as boolean;
+  const socialAvatarUrl = value.socialAvatarUrl as string;
 
-  const user: CommentUser = { id, firstName, lastName };
+  const user: CommentUser = {
+    id,
+    firstName,
+    lastName,
+    socialAcc,
+    socialAvatarUrl,
+  };
   if (avatar !== undefined) {
     user.avatar = avatar;
   }
@@ -170,14 +184,14 @@ export function mergeGuestBlogCommentsInfiniteCache(
   queryKey: GuestBlogCommentsQueryKey,
   op: MergeGuestBlogCommentsOp,
 ): void {
-  const old = queryClient.getQueryData<InfiniteData<GuestCommentsResponse>>(
-    queryKey,
-  );
+  const old =
+    queryClient.getQueryData<InfiniteData<GuestCommentsResponse>>(queryKey);
   if (!old?.pages?.length) {
     return;
   }
 
-  const pageSize = old.pages[0].meta.itemsPerPage ?? GUEST_BLOG_COMMENTS_PAGE_SIZE;
+  const pageSize =
+    old.pages[0].meta.itemsPerPage ?? GUEST_BLOG_COMMENTS_PAGE_SIZE;
   const pageCount = old.pages.length;
   const capacity = pageCount * pageSize;
   const prevFlat = old.pages.flatMap((p) => p.results);
